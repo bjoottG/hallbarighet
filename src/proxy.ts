@@ -20,7 +20,7 @@ export function proxy(req: NextRequest) {
   return new NextResponse('Åtkomst nekad', {
     status: 401,
     headers: {
-      'WWW-Authenticate': 'Basic realm="Interregdatabas", charset="UTF-8"',
+      'WWW-Authenticate': 'Basic realm="Hallbarhet", charset="UTF-8"',
     },
   });
 }

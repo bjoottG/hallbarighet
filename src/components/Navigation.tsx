@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 const tabs = [
   { label: 'Översikt', href: '/oversikt' },
   { label: 'Diagram', href: '/diagram' },
-  { label: 'Partners', href: '/tabell' },
+  { label: 'Agenda 2030', href: '/agenda2030' },
   { label: 'Ordlista', href: '/ordlista' },
 ];
 

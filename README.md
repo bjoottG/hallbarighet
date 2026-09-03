@@ -1,23 +1,35 @@
 # Hållbarhet
 
-Dashboard för hållbarhetsdata, byggd med [Next.js](https://nextjs.org). Strukturen är baserad på [interregbarometern](https://github.com/bjoottG/interregbarometern) men ska få en egen datastruktur och egen rådata.
+Dashboard för hållbarhetsdata i Tillväxtverkets ärenden, byggd med [Next.js](https://nextjs.org). Strukturen är baserad på [interregbarometern](https://github.com/bjoottG/interregbarometern).
 
-## Status
+## Innehåll
 
-- [x] Projektskelett kopierat från interregbarometern (sidor, filter, diagram, tabeller, karta)
-- [ ] Ny datastruktur definierad utifrån Excel med rådata (**väntar på Excelfilen**)
-- [ ] `public/data/rawdata.json` ersatt med hållbarhetsdata
-- [ ] Typer i `src/types/index.ts` anpassade till den nya datastrukturen
-- [ ] Komponenter anpassade till nya fält
+- **Översikt** – 7 KPI-rutor och 7 filterstyrda tabeller (hållbarhetsområden, delområden, utlysningar, branscher, AOS-bedömning, AOU-utfall, ärendelista).
+- **Diagram** – filterstyrda diagram över områden, delområden, branscher, AOS-bedömningar, AOU-utfall och utlysningar.
+- **Agenda 2030** – relationerna hållbarhetsområde → delområde → globala mål, med KPI:er, diagram och tabell per mål.
+- **Ordlista** – begrepp och definitioner, inklusive de sju hållbarhetsområdena.
 
-Tills den nya rådatan finns på plats ligger Interreg-datan kvar som platshållare så att appen bygger och går att deploya.
+## Data
 
-## Dataflöde
+Rådata ligger i `data/`:
 
-1. Rådata levereras som Excel.
-2. Excel konverteras till JSON och sparas som `public/data/rawdata.json`.
-3. `src/lib/data.ts` läser JSON:en, `src/types/index.ts` definierar typerna.
-4. Komponenterna i `src/components/` filtrerar och visualiserar datan via `src/context/FilterContext.tsx`.
+| Fil | Innehåll |
+|---|---|
+| `hallbarhetsomraden_ver3.xlsx` | 950 ärenden med grunddata och hållbarhetsval (Nivå 1/Nivå 2, AOS- och AOU-bedömningar) |
+| `hallbarhetsområden_agend2030.xlsx` | Definitioner av områden och delområden samt koppling till Agenda 2030-målen |
+| `hallbarhetsomraden._niva1_niva2xlsx.xlsx` | Referens: Nivå 1/Nivå 2-strukturen |
+
+Konvertering till appens format görs med:
+
+```bash
+npm run convert-data
+```
+
+Skriptet läser Excelfilerna och genererar `public/data/rawdata.json` (ärenden) och `src/lib/omradenDef.ts` (områdesdefinitioner). Kör om det när Excelfilerna uppdateras.
+
+## Filter
+
+Alla tabeller och diagram styrs av filtren: Utlysning, Bransch, Hållbarhetsområde (Nivå 1), Delområde (Nivå 2), AOS – Godkännas (bedömning), Slutlig AOU – Bidragit till, Slutlig AOU – Godkänd samt Agenda 2030-mål.
 
 ## Utveckling
 
@@ -26,8 +38,8 @@ npm install
 npm run dev
 ```
 
-Öppna [http://localhost:3000](http://localhost:3000).
+Öppna [http://localhost:3000](http://localhost:3000). Sajten skyddas av Basic Auth (samma inloggning som interregbarometern).
 
 ## Deploy
 
-Projektet deployas till Vercel med projektnamnet `hallbarighet`.
+Projektet deployas till Vercel med projektnamnet `hallbarighet`. GitHub-repot är kopplat för automatisk deploy vid push till `main`.

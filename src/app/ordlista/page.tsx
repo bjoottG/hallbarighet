@@ -2,6 +2,7 @@
 
 import Header from '@/components/Header';
 import Navigation from '@/components/Navigation';
+import { OMRADEN } from '@/types';
 
 interface Term {
   term: string;
@@ -11,150 +12,111 @@ interface Term {
 
 const TERMS: Term[] = [
   {
-    term: 'AP – Associate Partner',
-    category: 'Partnerroll',
-    definition: 'Associerad partner. Deltar i projektet utan att erhålla EU-medel direkt. Bidrar med kompetens, nätverk eller resurser men är inte stödmottagare.',
+    term: 'Ärende',
+    category: 'Grunddata',
+    definition: 'En ansökan om stöd som handläggs av Tillväxtverket. Varje rad i datan är ett ärende, identifierat med ett unikt ärende-id.',
   },
   {
-    term: 'Avslutad (projekt)',
-    category: 'Projektstatus',
-    definition: 'Projekt vars slutdatum passerat. Projektet är avslutat och ingår inte i aktiva åtgärder.',
+    term: 'Ärende-id',
+    category: 'Grunddata',
+    definition: 'Unikt identifikationsnummer för ett ärende i Tillväxtverkets ärendehantering.',
   },
   {
-    term: 'ERDF – European Regional Development Fund',
+    term: 'Stödtyp',
+    category: 'Grunddata',
+    definition: 'Typ av stöd som ärendet avser. PROJ = projektstöd.',
+  },
+  {
+    term: 'Utlysning',
+    category: 'Grunddata',
+    definition: 'Den utlysning (ansökningsomgång) som ärendet lämnats in inom. En utlysning riktar sig mot ett visst tema eller en viss målgrupp.',
+  },
+  {
+    term: 'Beviljat belopp',
     category: 'Finansiering',
-    definition: 'EU:s regionalfond. Den fond som finansierar Interreg-programmen. ERDF syftar till att minska regionala skillnader i Europa genom investeringar i tillväxt, innovation och hållbarhet.',
+    definition: 'Det belopp i kronor som beviljats för ärendet.',
   },
   {
-    term: 'EU-medel (ERDF)',
+    term: 'Utbetalt belopp',
     category: 'Finansiering',
-    definition: 'Det EU-stöd från regionalfonden som en partner erhåller för sin del av projektet. Värdet i dashboarden avser enbart EU-medel och inkluderar inte medfinansiering från nationella eller regionala källor.',
+    definition: 'Det belopp i kronor som hittills betalats ut för ärendet. Utbetalt belopp kan vara lägre än beviljat, t.ex. för pågående ärenden.',
   },
   {
-    term: 'Gränsregionalt samarbete (Strand A)',
-    category: 'Programkategori',
-    definition: 'Interreg-program som samlar regioner längs gemensamma landgränser eller havsbaserade gränser. Exempel: Sverige–Norge, Öresund–Kattegat–Skagerrak, Central Baltic.',
+    term: 'Bransch',
+    category: 'Grunddata',
+    definition: 'Den sökande aktörens bransch enligt SNI:s avdelningsindelning, t.ex. C Tillverkning eller F Byggverksamhet.',
   },
   {
-    term: 'Interreg',
-    category: 'Program',
-    definition: 'EU:s program för territoriellt samarbete mellan regioner i Europa. Interreg finansieras av ERDF och syftar till att stärka ekonomisk, social och territoriell sammanhållning.',
+    term: 'Hållbarhetsområde (Nivå 1)',
+    category: 'Hållbarhet',
+    definition: 'Ett av sju övergripande hållbarhetsområden som en sökande kan ange att ärendet bidrar till: Klimat och miljö, Cirkularitet och effektivt resursnyttjande, Hållbar konsumtion och marknad, Social inkludering och jämlikhet, Hälsa och välbefinnande, Ekonomisk hållbarhet samt Motverka hunger och fattigdom. Ett ärende kan välja flera områden.',
   },
   {
-    term: 'Interregionalt samarbete (Strand C)',
-    category: 'Programkategori',
-    definition: 'Pan-europeiskt Interreg-program för erfarenhetsutbyte och kapacitetsutveckling. Täcker hela EU. Exempel: Interreg Europe, URBACT IV.',
+    term: 'Delområde (Nivå 2)',
+    category: 'Hållbarhet',
+    definition: 'En mer specifik inriktning inom ett hållbarhetsområde, t.ex. Minska växthusgasutsläpp inom Klimat och miljö. Det finns 20 delområden fördelade på de sju hållbarhetsområdena. För varje delområde anger sökande om ärendet bidrar (Ja/Nej).',
   },
   {
-    term: 'ISO – Interreg-specifika mål',
-    category: 'Politiskt mål',
-    definition: 'En separat målkategori för Interreg-program som kompletterar de ordinarie politiska målen (PO1–PO5). Fokuserar på institutionell kapacitet och gränsöverskridande samarbete.',
+    term: 'AOS – Ansökan om stöd',
+    category: 'Bedömning',
+    definition: 'Uppgifter som lämnas och bedöms i samband med ansökan om stöd. I ansökan anger sökande vilka hållbarhetsområden och delområden ärendet bidrar till.',
   },
   {
-    term: 'Kat. – Programkategori',
-    category: 'Programkategori',
-    definition: 'Förkortad beteckning för programkategori (strand). A = Gränsregionalt, B = Transnationellt, C = Interregionalt.',
+    term: 'AOS – Bidrar till (sökande)',
+    category: 'Bedömning',
+    definition: 'Sökandes egen uppgift i ansökan om att ärendet bidrar till ett visst delområde (Ja/Nej). Lämnas bara för hållbarhetsområden som valts på Nivå 1.',
   },
   {
-    term: 'Lead Partner (LP)',
-    category: 'Partnerroll',
-    definition: 'Samordnad stödmottagare. Ansvarar för projektet gentemot programsekretariatet, undertecknar partnerskap­savtalet och hanterar EU-medlen för hela projektet.',
+    term: 'AOS – Godkännas (bedömning)',
+    category: 'Bedömning',
+    definition: 'Handläggarens bedömning av ärendets bidrag till ett valt hållbarhetsområde, på skalan 0 Nej, 1 Hänsyn, 2 Positiv påverkan, 3 Transformativt. Vid bedömningen 0 följs området inte upp vidare.',
   },
   {
-    term: 'LP – Lead Partner',
-    category: 'Partnerroll',
-    definition: 'Se Lead Partner.',
+    term: 'Bedömningsskala AOS (0–3)',
+    category: 'Bedömning',
+    definition: '0 Nej = området godkänns inte som hållbarhetsinsats. 1 Hänsyn = insatsen tar hänsyn till området. 2 Positiv påverkan = insatsen har en positiv påverkan på området. 3 Transformativt = insatsen bedöms vara transformativ inom området.',
   },
   {
-    term: 'NUTS – Nomenclature des Unités Territoriales Statistiques',
-    category: 'Geografi',
-    definition: 'EU:s standard för klassificering av geografiska regioner för statistiska ändamål. Används för att identifiera var partners är lokaliserade.',
+    term: 'AOU – Ansökan om utbetalning',
+    category: 'Bedömning',
+    definition: 'Uppgifter som lämnas och bedöms i samband med ansökan om utbetalning, där ärendets faktiska resultat följs upp mot det som angavs i ansökan om stöd.',
   },
   {
-    term: 'NUTS 2',
-    category: 'Geografi',
-    definition: 'Geografisk indelningsnivå 2 i EU:s NUTS-klassificering. Motsvarar i Sverige de åtta riksområdena, t.ex. Sydsverige, Västsverige och Norra Mellansverige.',
+    term: 'Slutlig AOU – Bidragit till (sökande)',
+    category: 'Bedömning',
+    definition: 'Sökandes slutliga bedömning av om ärendet bidragit till hållbarhetsområdet: 1 Har till största del uppnåtts, 2 Bara vissa delar har uppnåtts, 3 Har ej uppnåtts.',
   },
   {
-    term: 'NUTS 3',
-    category: 'Geografi',
-    definition: 'Geografisk indelningsnivå 3 i EU:s NUTS-klassificering. Motsvarar i Sverige de 21 länen, t.ex. Skåne, Västra Götaland och Norrbotten.',
+    term: 'Slutlig AOU – Godkännas (bedömning)',
+    category: 'Bedömning',
+    definition: 'Handläggarens slutliga bedömning (Ja/Nej) av om ärendets hållbarhetsarbete inom området kan godkännas vid ansökan om utbetalning.',
   },
   {
-    term: 'PO1 – Ett smartare Europa',
-    category: 'Politiskt mål',
-    definition: 'Politiskt mål 1. Fokuserar på innovation, digitalisering, SMF-tillväxt och smart specialisering.',
+    term: 'Agenda 2030',
+    category: 'Agenda 2030',
+    definition: 'FN:s globala handlingsplan för hållbar utveckling med 17 globala mål som antogs 2015. Varje delområde i dashboarden är kopplat till ett eller flera av de globala målen — se fliken Agenda 2030.',
   },
   {
-    term: 'PO2 – Ett grönare Europa',
-    category: 'Politiskt mål',
-    definition: 'Politiskt mål 2. Fokuserar på energiomställning, klimatanpassning, cirkulär ekonomi och biologisk mångfald.',
+    term: 'Globala målen (SDG)',
+    category: 'Agenda 2030',
+    definition: 'De 17 målen i Agenda 2030 (Sustainable Development Goals), t.ex. Mål 7 Hållbar energi för alla och Mål 13 Bekämpa klimatförändringarna. Ett ärende räknas till ett mål när det bidrar till ett delområde som är kopplat till målet.',
   },
   {
-    term: 'PO3 – Ett mer sammanlänkat Europa',
-    category: 'Politiskt mål',
-    definition: 'Politiskt mål 3. Fokuserar på rörlighet, transport och digital infrastruktur.',
-  },
-  {
-    term: 'PO4 – Ett mer socialt Europa',
-    category: 'Politiskt mål',
-    definition: 'Politiskt mål 4. Fokuserar på social inkludering, utbildning, hälsa och arbetsmarknad.',
-  },
-  {
-    term: 'PO5 – Ett Europa närmare medborgarna',
-    category: 'Politiskt mål',
-    definition: 'Politiskt mål 5. Fokuserar på lokal och territoriell utveckling samt hållbar turism och kultur.',
-  },
-  {
-    term: 'PP – Projekt Partner',
-    category: 'Partnerroll',
-    definition: 'Se Projekt Partner.',
-  },
-  {
-    term: 'Programperiod 2021–2027',
-    category: 'Program',
-    definition: 'Den nuvarande EU-budgetperioden. Interreg-programmen i dashboarden tillhör denna period.',
-  },
-  {
-    term: 'Projekt Partner (PP)',
-    category: 'Partnerroll',
-    definition: 'Medverkande projektpartner. Deltar aktivt i projektgenomförandet och erhåller EU-medel för sin del av projektet. Tecknar partnersk­apsavtal med Lead Partner.',
-  },
-  {
-    term: 'Pågående (projekt)',
-    category: 'Projektstatus',
-    definition: 'Projekt vars startdatum passerats men slutdatum ännu inte nåtts. Projektet är aktivt och pågår.',
-  },
-  {
-    term: 'RSO – Regionalspecifika mål',
-    category: 'Specifikt mål',
-    definition: 'Regionspecifika mål (Regional Specific Objectives) som specificerar hur ett projekt bidrar till ett politiskt mål. Varje politiskt mål har ett eller flera RSO-mål, t.ex. RSO1.1 Stärka forskning och innovation.',
-  },
-  {
-    term: 'Specifikt mål',
-    category: 'Specifikt mål',
-    definition: 'Det detaljerade mål som ett projekt är kopplat till inom ett politiskt mål. Koderna börjar med RSO (Regionalspecifika mål) eller ISO (Interreg-specifika mål).',
-  },
-  {
-    term: 'Strand',
-    category: 'Programkategori',
-    definition: 'Beteckning för typ av Interreg-program: A (Gränsregionalt), B (Transnationellt) eller C (Interregionalt). Bestäms av programmets geografiska och tematiska inriktning.',
-  },
-  {
-    term: 'Svenska partners',
-    category: 'Partner',
-    definition: 'Organisationer registrerade i Sverige som deltar i ett Interreg-projekt i rollen som LP, PP eller AP. Dashboarden visar enbart svenska partners.',
+    term: 'SNI – Svensk näringsgrensindelning',
+    category: 'Grunddata',
+    definition: 'Standard för att klassificera företag och arbetsställen efter verksamhet. Branschkolumnen i dashboarden använder SNI:s avdelningsbokstäver (A–U).',
   },
   {
     term: 'Tillväxtverket',
     category: 'Organisation',
-    definition: 'Sveriges nationella myndighet för tillväxt och regional utveckling. Nationell kontaktpunkt för flera Interreg-program och ansvarar för att följa upp svenska partners deltagande.',
+    definition: 'Sveriges nationella myndighet för tillväxt och regional utveckling. Handlägger de stöd och utlysningar som visas i dashboarden.',
   },
-  {
-    term: 'Transnationellt samarbete (Strand B)',
-    category: 'Programkategori',
-    definition: 'Interreg-program som täcker större geografiska områden, t.ex. Östersjön eller Nordsjön. Samlar länder och regioner kring gemensamma utmaningar. Exempel: Baltic Sea Region, Interreg North Sea, Northern Periphery and Arctic.',
-  },
+  // Definitioner av de sju hållbarhetsområdena
+  ...OMRADEN.map((o) => ({
+    term: `${o.nummer}. ${o.namn}`,
+    category: 'Hållbarhetsområde',
+    definition: `${o.beskrivning} Delområden: ${o.delomraden.map((d) => d.namn).join(', ')}.`,
+  })),
 ];
 
 const sorted = [...TERMS].sort((a, b) => a.term.localeCompare(b.term, 'sv'));
@@ -162,16 +124,13 @@ const sorted = [...TERMS].sort((a, b) => a.term.localeCompare(b.term, 'sv'));
 const CATEGORIES = [...new Set(TERMS.map(t => t.category).filter(Boolean))].sort() as string[];
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Finansiering':      '#00A896',
-  'Geografi':          '#2196A8',
-  'Organisation':      '#7B4FBC',
-  'Partner':           '#4A1B8B',
-  'Partnerroll':       '#4A1B8B',
-  'Politiskt mål':     '#A855F7',
-  'Program':           '#E040FB',
-  'Programkategori':   '#7B4FBC',
-  'Projektstatus':     '#00BCD4',
-  'Specifikt mål':     '#9C27B0',
+  'Grunddata':          '#2196A8',
+  'Finansiering':       '#00A896',
+  'Hållbarhet':         '#4A1B8B',
+  'Hållbarhetsområde':  '#7B4FBC',
+  'Bedömning':          '#9C27B0',
+  'Agenda 2030':        '#E040FB',
+  'Organisation':       '#00BCD4',
 };
 
 export default function OrdlistaPage() {

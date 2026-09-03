@@ -1,33 +1,26 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import type { Projekt, FilterState } from '@/types';
-import { FILTER_DEFAULTS, mapOrgTyp } from '@/types';
-
-const TODAY = '2026-05-29';
-
-function computeStatus(row: Projekt): string {
-  if (row.startdatum > TODAY) return 'Kommande';
-  if (row.slutdatum < TODAY) return 'Avslutad';
-  return 'Pågående';
-}
+import type { Arende, FilterState } from '@/types';
+import { FILTER_DEFAULTS, OMRADEN, DELOMRADE_OMRADE } from '@/types';
+import { arendeAgendaMal } from '@/lib/dataUtils';
 
 interface FilterContextValue {
-  data: Projekt[];
-  filtered: Projekt[];
+  data: Arende[];
+  filtered: Arende[];
   filters: FilterState;
   setFilter: <K extends keyof FilterState>(key: K, value: FilterState[K]) => void;
   resetFilters: () => void;
   isLoading: boolean;
   error: string | null;
-  allProjektnamn: string[];
-  allOrganisationsnamn: string[];
+  allUtlysningar: string[];
+  allBranscher: string[];
 }
 
 const FilterContext = createContext<FilterContextValue | null>(null);
 
 export function FilterProvider({ children }: { children: React.ReactNode }) {
-  const [data, setData] = useState<Projekt[]>([]);
+  const [data, setData] = useState<Arende[]>([]);
   const [filters, setFilters] = useState<FilterState>(FILTER_DEFAULTS);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,15 +28,8 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     fetch('/data/rawdata.json')
       .then((r) => { if (!r.ok) throw new Error('Kunde inte hämta rawdata.json'); return r.json(); })
-      .then((json: Projekt[]) => {
-        const complete = json.filter(r =>
-          !!r.organisationsnamn &&
-          !!r.organisationstyp &&
-          !!r.nuts3 &&
-          !!r.politisktmal &&
-          !!r.specifiktmal
-        );
-        setData(complete);
+      .then((json: Arende[]) => {
+        setData(json.filter((r) => r.arendeid != null));
         setIsLoading(false);
       })
       .catch((e: Error) => { setError(e.message); setIsLoading(false); });
@@ -57,30 +43,69 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
 
   const filtered = React.useMemo(() => {
     return data.filter((row) => {
-      if (filters.program.length > 0 && !filters.program.includes(row.program)) return false;
-      if (filters.strand.length > 0 && !filters.strand.includes(`${row.strand_kod} – ${row.strand_namn}`)) return false;
-      if (filters.politisktmal.length > 0 && !filters.politisktmal.includes(row.politisktmal)) return false;
-      if (filters.specifiktmal.length > 0 && !filters.specifiktmal.includes(row.specifiktmal)) return false;
-      if (filters.projektnamn.length > 0 && !filters.projektnamn.includes(row.projektnamn)) return false;
-      if (filters.projekttyp.length > 0 && !filters.projekttyp.includes(row.projekttyp)) return false;
-      if (filters.projektår.length > 0 && !filters.projektår.includes(String(row.projektår))) return false;
-      if (filters.organisationsnamn.length > 0 && !filters.organisationsnamn.includes(row.organisationsnamn)) return false;
-      if (filters.organisationsroll.length > 0 && !filters.organisationsroll.includes(row.organisationsroll)) return false;
-      if (filters.organisationstyp.length > 0 && !filters.organisationstyp.includes(mapOrgTyp(row.organisationstyp))) return false;
-      if (filters.organisationsagande.length > 0 && !filters.organisationsagande.includes(row.organisationsagande)) return false;
-      if (filters.pagaende.length > 0 && !filters.pagaende.includes(computeStatus(row))) return false;
-      if (filters.aktiv !== 'Alla' && row.aktiv !== filters.aktiv) return false;
-      if (filters.nuts2.length > 0 && !filters.nuts2.includes(row.nuts2)) return false;
-      if (filters.nuts3.length > 0 && !filters.nuts3.includes(row.nuts3)) return false;
+      if (filters.utlysning.length > 0 && !filters.utlysning.includes(row.utlysning)) return false;
+      if (filters.bransch.length > 0 && !filters.bransch.includes(row.bransch)) return false;
+
+      // Hållbarhetsområde: ärendet har valt minst ett av de valda områdena
+      if (filters.omrade.length > 0 &&
+          !filters.omrade.some((id) => row.omraden[id]?.valt)) return false;
+
+      // Delområde: sökande har angett Bidrar till = Ja för minst ett valt delområde
+      if (filters.delomrade.length > 0 &&
+          !filters.delomrade.some((subId) => {
+            const omradeId = DELOMRADE_OMRADE[subId];
+            return row.omraden[omradeId]?.delomraden[subId] === 'Ja';
+          })) return false;
+
+      // AOS-bedömning: minst ett områdesval har någon av de valda nivåerna.
+      // Om områdesfilter är satt begränsas kontrollen till de områdena.
+      if (filters.aosBedomning.length > 0) {
+        const ids = filters.omrade.length > 0 ? filters.omrade : OMRADEN.map((o) => o.id);
+        if (!ids.some((id) => {
+          const v = row.omraden[id]?.aosGodkannas;
+          return v != null && filters.aosBedomning.includes(String(v));
+        })) return false;
+      }
+
+      // Slutlig AOU – Bidragit till (sökande)
+      if (filters.aouBidragit.length > 0) {
+        const ids = filters.omrade.length > 0 ? filters.omrade : OMRADEN.map((o) => o.id);
+        if (!ids.some((id) => {
+          const v = row.omraden[id]?.aouBidragit;
+          return v != null && filters.aouBidragit.includes(String(v));
+        })) return false;
+      }
+
+      // Slutlig AOU – Godkännas (bedömning)
+      if (filters.aouGodkannas.length > 0) {
+        const ids = filters.omrade.length > 0 ? filters.omrade : OMRADEN.map((o) => o.id);
+        if (!ids.some((id) => {
+          const v = row.omraden[id]?.aouGodkannas;
+          return v != null && filters.aouGodkannas.includes(v);
+        })) return false;
+      }
+
+      // Agenda 2030-mål (via delområden med Bidrar till = Ja)
+      if (filters.agendaMal.length > 0) {
+        const mal = arendeAgendaMal(row);
+        if (!filters.agendaMal.some((m) => mal.includes(Number(m)))) return false;
+      }
+
       return true;
     });
   }, [data, filters]);
 
-  const allProjektnamn = React.useMemo(() => Array.from(new Set(data.map((r) => r.projektnamn))).sort(), [data]);
-  const allOrganisationsnamn = React.useMemo(() => Array.from(new Set(data.map((r) => r.organisationsnamn))).sort(), [data]);
+  const allUtlysningar = React.useMemo(
+    () => Array.from(new Set(data.map((r) => r.utlysning))).sort((a, b) => a.localeCompare(b, 'sv')),
+    [data],
+  );
+  const allBranscher = React.useMemo(
+    () => Array.from(new Set(data.map((r) => r.bransch))).sort((a, b) => a.localeCompare(b, 'sv')),
+    [data],
+  );
 
   return (
-    <FilterContext.Provider value={{ data, filtered, filters, setFilter, resetFilters, isLoading, error, allProjektnamn, allOrganisationsnamn }}>
+    <FilterContext.Provider value={{ data, filtered, filters, setFilter, resetFilters, isLoading, error, allUtlysningar, allBranscher }}>
       {children}
     </FilterContext.Provider>
   );

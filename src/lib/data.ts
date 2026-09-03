@@ -1,19 +1,14 @@
-import type { Projekt } from '@/types';
+import type { Arende } from '@/types';
 
-let cachedData: Projekt[] | null = null;
+let cachedData: Arende[] | null = null;
 
-export async function getData(): Promise<Projekt[]> {
+export async function getData(): Promise<Arende[]> {
   if (cachedData) return cachedData;
 
   const res = await fetch('/data/rawdata.json');
   if (!res.ok) throw new Error('Kunde inte läsa rawdata.json');
 
   const json = await res.json();
-  cachedData = json as Projekt[];
+  cachedData = json as Arende[];
   return cachedData;
-}
-
-// Synchronous version for client components that have already loaded data
-export function parseData(raw: unknown[]): Projekt[] {
-  return raw as Projekt[];
 }

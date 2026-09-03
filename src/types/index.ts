@@ -1,212 +1,135 @@
-export interface Projekt {
-  id: number;
-  program: string;
-  projekttyp: string;
-  startdatum: string;
-  slutdatum: string;
-  projektnamn: string;
-  organisationsnamn: string;
-  organisationsagande: string;
-  organisationstyp: string;
-  organisationsroll: string;
-  nuts3: string;
-  nuts2: string;
-  partnerbudget: number;
-  politisktmal: string;
-  specifiktmal: string;
-  projektår: number;
-  land: string;
-  aktiv: string;
-  strand_kod: string;
-  strand_namn: string;
+import { OMRADEN } from '@/lib/omradenDef';
+export { OMRADEN } from '@/lib/omradenDef';
+export type { OmradeDef, DelomradeDef } from '@/lib/omradenDef';
+
+// ─── Datamodell ──────────────────────────────────────────────────────────────
+
+/** Ett ärendes uppgifter för ett hållbarhetsområde (Nivå 1) */
+export interface OmradeData {
+  /** Området valt i ansökan [Ja/Nej] */
+  valt: boolean;
+  /** AOS – Bidrar till (sökande) per delområde: 'Ja' | 'Nej' | null */
+  delomraden: Record<string, string | null>;
+  /** AOS – Godkännas (bedömning): 0 Nej, 1 Hänsyn, 2 Positiv påverkan, 3 Transformativt */
+  aosGodkannas: number | null;
+  /** Slutlig AOU – Bidragit till (sökande): 1–3 */
+  aouBidragit: number | null;
+  /** Slutlig AOU – Godkännas (bedömning): 'Ja' | 'Nej' */
+  aouGodkannas: string | null;
 }
 
-export const STRAND_VALUES = [
-  'A – Gränsregionalt',
-  'B – Transnationellt',
-  'C – Interregionalt',
-];
+export interface Arende {
+  arendeid: number;
+  stodtyp: string;
+  utlysning: string;
+  beviljat: number;
+  utbetalt: number;
+  bransch: string;
+  omraden: Record<string, OmradeData>;
+}
+
+// ─── Filter ──────────────────────────────────────────────────────────────────
 
 export interface FilterState {
-  program: string[];
-  strand: string[];
-  politisktmal: string[];
-  specifiktmal: string[];
-  projektnamn: string[];
-  projekttyp: string[];
-  projektår: string[];
-  organisationsnamn: string[];
-  organisationsroll: string[];
-  organisationstyp: string[];
-  organisationsagande: string[];
-  pagaende: string[];   // Pågående Projekt: Pågående | Avslutad | Kommande
-  aktiv: string;
-  nuts2: string[];
-  nuts3: string[];
+  utlysning: string[];
+  bransch: string[];
+  omrade: string[];        // område-id (Nivå 1)
+  delomrade: string[];     // delområde-id (Nivå 2)
+  aosBedomning: string[];  // '0' | '1' | '2' | '3'
+  aouBidragit: string[];   // '1' | '2' | '3'
+  aouGodkannas: string[];  // 'Ja' | 'Nej'
+  agendaMal: string[];     // '1'–'17'
 }
 
 export const FILTER_DEFAULTS: FilterState = {
-  program: [],
-  strand: [],
-  politisktmal: [],
-  specifiktmal: [],
-  projektnamn: [],
-  projekttyp: [],
-  projektår: [],
-  organisationsnamn: [],
-  organisationsroll: [],
-  organisationstyp: [],
-  organisationsagande: [],
-  pagaende: [],
-  aktiv: 'Alla',
-  nuts2: [],
-  nuts3: [],
+  utlysning: [],
+  bransch: [],
+  omrade: [],
+  delomrade: [],
+  aosBedomning: [],
+  aouBidragit: [],
+  aouGodkannas: [],
+  agendaMal: [],
 };
 
-export const PAGAENDE_STATUS = ['Pågående', 'Avslutad'];
+// ─── Uppslag och etiketter ───────────────────────────────────────────────────
 
-export const PROGRAMS = [
-  'AURORA',
-  'Baltic Sea Region',
-  'Central Baltic',
-  'Interreg europe',
-  'Interreg North Sea',
-  'Northern Periphery and Arctic',
-  'South Baltic Programme',
-  'Sverige-Norge',
-  'URBACT IV',
-  'Öresund-Kattegat-Skagerrak',
-];
+export const OMRADE_IDS = OMRADEN.map((o) => o.id);
 
-export const POLITISKA_MAL = ['ISO', 'PO1', 'PO2', 'PO3', 'PO4', 'PO5', 'PO6'];
+export const OMRADE_NAMN: Record<string, string> = Object.fromEntries(
+  OMRADEN.map((o) => [o.id, `${o.nummer}. ${o.namn}`]),
+);
 
-export const SPECIFIKA_MAL = [
-  'ISO6.1', 'ISO6.6', 'RSO1.1', 'RSO1.2', 'RSO1.3', 'RSO1.4', 'RSO1.5',
-  'RSO2.1', 'RSO2.2', 'RSO2.3', 'RSO2.4', 'RSO2.5', 'RSO2.6', 'RSO2.7', 'RSO2.8',
-  'RSO3.1', 'RSO3.2',
-  'RSO4.1', 'RSO4.2', 'RSO4.3', 'RSO4.4', 'RSO4.5', 'RSO4.6',
-  'RSO5.1', 'RSO5.2',
-  'RSO6.1', 'RSO6.4',
-];
+export const DELOMRADE_NAMN: Record<string, string> = Object.fromEntries(
+  OMRADEN.flatMap((o) => o.delomraden.map((d) => [d.id, d.namn])),
+);
 
-export const PROJEKTTYPER = ['Regular', 'Small', 'Feasibility study', 'Full Application'];
+/** delområde-id → område-id */
+export const DELOMRADE_OMRADE: Record<string, string> = Object.fromEntries(
+  OMRADEN.flatMap((o) => o.delomraden.map((d) => [d.id, o.id])),
+);
 
-export const PROJEKTÅR = ['2022', '2023', '2024', '2025', '2026'];
+/** delområde-id → Agenda 2030-mål */
+export const DELOMRADE_AGENDA: Record<string, number[]> = Object.fromEntries(
+  OMRADEN.flatMap((o) => o.delomraden.map((d) => [d.id, d.agenda2030])),
+);
 
-export const ORG_ROLLER = ['LP', 'PP', 'AP'];
-
-export const ORG_AGANDE = ['Private', 'Public', 'Other'];
-
-export const ORG_TYP_MAP: Record<string, string> = {
-  'Regional public authority':    'Regional public authority',
-  'Higher education and research institution': 'Higher education',
-  'Education and research institution': 'Higher education',
-  'National public authority':    'National public authority',
-  'Research':                     'Research',
-  'Local public authority':       'Local public authority',
-  'Business support organisation':'Business support',
-  'Small or medium-sized enterprise (SME)': 'SME',
-  'Large enterprise':             'Large enterprise',
-  'Enterprise, except SME':       'Enterprise',
-  'NGO':                          'NGO',
-  'Interest groups including NGOs': 'NGO',
-  'Sectoral agency':              'Sectoral agency',
-  'Bodies governed by public law':'Bodies (public law)',
-  'Other':                        'Other',
-  'EGTC':                         'EGTC',
-  'Hospital and medical centre':  'Hospital and medical centre',
-  'Infrastructure and (Public organisation) service provider': 'Infrastructure and (Public organisation) service provider',
-  'International governmental organisation': 'International governmental organisation',
-  'national, regional and local authorities': 'national, regional and local authorities',
+export const AOS_SKALA: Record<string, string> = {
+  '0': '0 – Nej',
+  '1': '1 – Hänsyn',
+  '2': '2 – Positiv påverkan',
+  '3': '3 – Transformativt',
 };
 
-export function mapOrgTyp(raw: string | null | undefined): string {
-  return ORG_TYP_MAP[raw ?? ''] ?? raw ?? 'Okänd';
-}
-
-export const ORG_TYPER_DISPLAY = [...new Set(Object.values(ORG_TYP_MAP))].sort();
-
-export const ROLL_LABELS: Record<string, string> = {
-  LP: 'Lead Partner',
-  PP: 'Projekt Partner',
-  AP: 'Associate partner',
+export const AOS_BESKRIVNING: Record<string, string> = {
+  '0': 'Bedömningen godkänner inte området som hållbarhetsinsats',
+  '1': 'Insatsen tar hänsyn till hållbarhetsområdet',
+  '2': 'Insatsen har en positiv påverkan på hållbarhetsområdet',
+  '3': 'Insatsen är transformativ inom hållbarhetsområdet',
 };
 
-export const ROLL_DESCRIPTIONS: Record<string, string> = {
-  LP: 'Samordnad stödmottagare – ansvarar för projektet gentemot programsekretariatet',
-  PP: 'Medverkande projektpartner – deltar aktivt i projektgenomförandet',
-  AP: 'Associerad partner – deltar utan att erhålla projektmedel',
+export const AOU_SKALA: Record<string, string> = {
+  '1': '1 – Har till största del uppnåtts',
+  '2': '2 – Bara vissa delar har uppnåtts',
+  '3': '3 – Har ej uppnåtts',
 };
 
-export const POLITISKT_MAL_DEFINITIONER: Record<string, string> = {
-  ISO:  'Interreg-specifika mål',
-  PO1:  'Ett smartare Europa',
-  PO2:  'Ett grönare Europa',
-  PO3:  'Ett mer sammanlänkat Europa',
-  PO4:  'Ett mer socialt Europa',
-  PO5:  'Ett Europa närmare medborgarna',
+// ─── Agenda 2030 ─────────────────────────────────────────────────────────────
+
+export const AGENDA_MAL_NAMN: Record<number, string> = {
+  1: 'Ingen fattigdom',
+  2: 'Ingen hunger',
+  3: 'God hälsa och välbefinnande',
+  4: 'God utbildning',
+  5: 'Jämställdhet',
+  6: 'Rent vatten och sanitet för alla',
+  7: 'Hållbar energi för alla',
+  8: 'Anständiga arbetsvillkor och ekonomisk tillväxt',
+  9: 'Hållbar industri, innovationer och infrastruktur',
+  10: 'Minskad ojämlikhet',
+  11: 'Hållbara städer och samhällen',
+  12: 'Hållbar konsumtion och produktion',
+  13: 'Bekämpa klimatförändringarna',
+  14: 'Hav och marina resurser',
+  15: 'Ekosystem och biologisk mångfald',
+  16: 'Fredliga och inkluderande samhällen',
+  17: 'Genomförande och globalt partnerskap',
 };
 
-export const SPECIFIKT_MAL_DEFINITIONER: Record<string, string> = {
-  'RSO1.1': 'Stärka forskning och innovation',
-  'RSO1.2': 'Säkra nyttan av digitaliseringen',
-  'RSO1.3': 'Små och medelstora företags tillväxt och konkurrenskraft',
-  'RSO1.4': 'Kompetens för smart specialisering och omställning',
-  'RSO1.5': 'Digital konnektivitet',
-  'RSO2.1': 'Energieffektivitet',
-  'RSO2.2': 'Förnybar energi',
-  'RSO2.3': 'Smarta energisystem',
-  'RSO2.4': 'Anpassa till klimatförändringarna',
-  'RSO2.5': 'Främjande av tillgång till vatten och hållbar vattenförvaltning',
-  'RSO2.6': 'Cirkulär ekonomi',
-  'RSO2.7': 'Biologisk mångfald',
-  'RSO2.8': 'Hållbar rörlighet i städer',
-  'RSO3.1': 'Hållbara TEN-T-nät',
-  'RSO3.2': 'Hållbara transporter',
-  'RSO4.1': 'Infrastruktur för arbetsmarknaden',
-  'RSO4.2': 'Göra utbildning och lärande tillgängligt för alla',
-  'RSO4.4': 'Främja social inkludering och bekämpa fattigdom',
-  'RSO4.6': 'Stärka kultur och hållbar turism',
-  'RSO5.1': 'Stärka den territoriella sammanhållningen och lokala utvecklingen',
-  'ISO6.6': 'Förbättra institutionell kapacitet och effektiv offentlig förvaltning',
-  'JSO8.1': 'Fonden för rättvis omställning',
+/** FN:s officiella färger för de 17 globala målen */
+export const AGENDA_MAL_FARG: Record<number, string> = {
+  1: '#E5243B', 2: '#DDA63A', 3: '#4C9F38', 4: '#C5192D', 5: '#FF3A21',
+  6: '#26BDE2', 7: '#FCC30B', 8: '#A21942', 9: '#FD6925', 10: '#DD1367',
+  11: '#FD9D24', 12: '#BF8B2E', 13: '#3F7E44', 14: '#0A97D9', 15: '#56C02B',
+  16: '#00689D', 17: '#19486A',
 };
 
-export const NUTS2_VALUES = [
-  'Gotland',
-  'Mellersta Norrland',
-  'Norra Mellansverige',
-  'Småland och öarna',
-  'Stockholm',
-  'Sydsverige',
-  'Västsverige',
-  'Östra Mellansverige',
-  'Övre Norrland',
-];
+/** Alla mål som förekommer i delområdenas kopplingar, sorterade */
+export const AGENDA_MAL_AKTUELLA: number[] = [
+  ...new Set(OMRADEN.flatMap((o) => o.delomraden.flatMap((d) => d.agenda2030))),
+].sort((a, b) => a - b);
 
-export const NUTS3_VALUES = [
-  'Blekinge län',
-  'Dalarnas län',
-  'Gotlands län',
-  'Gävleborgs län',
-  'Hallands län',
-  'Jämtlands län',
-  'Jönköpings län',
-  'Kalmar län',
-  'Kronobergs län',
-  'Norrbottens län',
-  'Skåne län',
-  'Stockholms län',
-  'Södermanlands län',
-  'Uppsala län',
-  'Värmlands län',
-  'Västerbottens län',
-  'Västernorrlands län',
-  'Västmanlands län',
-  'Västra Götalands län',
-  'Örebro län',
-  'Östergötlands län',
-];
+// ─── Diagramfärger (samma palett som interregbarometern) ─────────────────────
 
 export const DIAGRAM_COLORS = [
   '#00A896',
@@ -220,3 +143,21 @@ export const DIAGRAM_COLORS = [
   '#F48FB1',
   '#80CBC4',
 ];
+
+/** Fast färg per hållbarhetsområde (nummer 1–7) */
+export const OMRADE_FARG: Record<string, string> = Object.fromEntries(
+  OMRADEN.map((o, i) => [o.id, DIAGRAM_COLORS[i % DIAGRAM_COLORS.length]]),
+);
+
+export const AOS_FARG: Record<string, string> = {
+  '0': '#C9C4D4',
+  '1': '#80CBC4',
+  '2': '#00A896',
+  '3': '#4A1B8B',
+};
+
+export const AOU_FARG: Record<string, string> = {
+  '1': '#00A896',
+  '2': '#F0A202',
+  '3': '#D64550',
+};

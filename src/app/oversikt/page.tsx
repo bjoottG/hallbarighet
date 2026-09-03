@@ -1,39 +1,46 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import Navigation from '@/components/Navigation';
 import FilterBar from '@/components/FilterBar';
 import KPICard from '@/components/KPICard';
-import NutsTable from '@/components/NutsTable';
-import ProgramTable from '@/components/ProgramTable';
-import KrysstabellPartners from '@/components/KrysstabellPartners';
-import BudgetMalTabell from '@/components/BudgetMalTabell';
+import { TableCard, TH, TD } from '@/components/Cards';
 import { useFilters } from '@/context/FilterContext';
-import { kpiAntalProjekt, kpiTotalBudget, kpiAntalPartners, formatNumber, formatBudget } from '@/lib/dataUtils';
+import {
+  kpiAntalArenden, kpiBeviljat, kpiUtbetalt, kpiAndelMedOmrade,
+  kpiSnittOmraden, kpiAndelAosPositiv, kpiAndelAouGodkand,
+  perOmrade, perDelomrade, perFalt, aosPerOmrade, aouPerOmrade, antalOmraden,
+  formatNumber, formatKr, formatKrFull, formatPct,
+} from '@/lib/dataUtils';
+import { AOS_SKALA, AOU_SKALA } from '@/types';
 
-// SSR-disable för Leaflet
-const SwedenMapLeaflet = dynamic(() => import('@/components/SwedenMapLeaflet'), { ssr: false });
+const ARENDEN_PER_SIDA = 25;
 
 export default function OversiktPage() {
-  const { filtered, isLoading, setFilter, filters } = useFilters();
-  const [mapMode] = useState<'nuts3' | 'nuts2'>('nuts3');
+  const { filtered, isLoading } = useFilters();
+  const [sida, setSida] = useState(0);
 
   const kpis = useMemo(() => ({
-    projekt:  kpiAntalProjekt(filtered),
-    budget:   kpiTotalBudget(filtered),
-    partners: kpiAntalPartners(filtered),
+    arenden: kpiAntalArenden(filtered),
+    beviljat: kpiBeviljat(filtered),
+    utbetalt: kpiUtbetalt(filtered),
+    andelMedOmrade: kpiAndelMedOmrade(filtered),
+    snittOmraden: kpiSnittOmraden(filtered),
+    andelAosPositiv: kpiAndelAosPositiv(filtered),
+    andelAouGodkand: kpiAndelAouGodkand(filtered),
   }), [filtered]);
 
-  function handleCountyClick(name: string) {
-    const current = filters.nuts3;
-    if (current.includes(name)) {
-      setFilter('nuts3', current.filter(n => n !== name));
-    } else {
-      setFilter('nuts3', [...current, name]);
-    }
-  }
+  const omradeRader = useMemo(() => perOmrade(filtered), [filtered]);
+  const delomradeRader = useMemo(() => perDelomrade(filtered).sort((a, b) => b.antal - a.antal), [filtered]);
+  const utlysningRader = useMemo(() => perFalt(filtered, 'utlysning'), [filtered]);
+  const branschRader = useMemo(() => perFalt(filtered, 'bransch'), [filtered]);
+  const aosRader = useMemo(() => aosPerOmrade(filtered), [filtered]);
+  const aouRader = useMemo(() => aouPerOmrade(filtered), [filtered]);
+
+  const antalSidor = Math.max(1, Math.ceil(filtered.length / ARENDEN_PER_SIDA));
+  const sidaClamped = Math.min(sida, antalSidor - 1);
+  const arendeSida = filtered.slice(sidaClamped * ARENDEN_PER_SIDA, (sidaClamped + 1) * ARENDEN_PER_SIDA);
 
   if (isLoading) {
     return (
@@ -53,61 +60,235 @@ export default function OversiktPage() {
       <Navigation />
       <FilterBar />
 
-      <main className="max-w-[1200px] mx-auto px-6 py-5">
-        {/* KPI-rad */}
-        <div className="grid grid-cols-3 gap-4 mb-5">
-          <KPICard title="Antal projekt" value={`${formatNumber(kpis.projekt)} st`} href="/tabell" />
-          <KPICard title="EU-medel (ERDF)" value={formatBudget(kpis.budget)} />
-          <KPICard title="Antal partners" value={`${formatNumber(kpis.partners)} st`} href="/tabell" />
+      <main className="max-w-[1200px] mx-auto px-6 py-5 flex flex-col gap-5">
+        {/* KPI-rad: 7 rutor */}
+        <div className="grid grid-cols-4 gap-4">
+          <KPICard title="Antal ärenden" value={`${formatNumber(kpis.arenden)} st`} />
+          <KPICard title="Beviljat belopp" value={formatKr(kpis.beviljat)} subtitle={formatKrFull(kpis.beviljat)} />
+          <KPICard title="Utbetalt belopp" value={formatKr(kpis.utbetalt)} subtitle={formatKrFull(kpis.utbetalt)} />
+          <KPICard title="Ärenden med hållbarhetsområde" value={formatPct(kpis.andelMedOmrade)} subtitle="Andel med minst ett valt område (Nivå 1)" />
+          <KPICard title="Områden per ärende" value={kpis.snittOmraden.toLocaleString('sv-SE', { maximumFractionDigits: 1 })} subtitle="Genomsnitt av valda hållbarhetsområden" />
+          <KPICard title="AOS: Positiv eller Transformativt" value={formatPct(kpis.andelAosPositiv)} subtitle="Andel av bedömda områdesval (nivå 2–3)" />
+          <KPICard title="Godkända slutliga AOU" value={formatPct(kpis.andelAouGodkand)} subtitle="Andel av AOU-bedömda områdesval" />
         </div>
 
-        {/* Rad 2: Tabell + Karta */}
-        <div className="grid grid-cols-2 gap-4 mb-5">
-          <div className="bg-white rounded-xl shadow-sm border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
-            <div className="px-4 pt-4 pb-2 border-b" style={{ borderColor: 'var(--color-border)' }}>
-              <h3 className="font-bold text-sm" style={{ color: 'var(--color-text)' }}>
-                Fördelning projekt och svenska partners per län
-              </h3>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
-                Ett projekt kan ha partners i flera län och räknas då flera gånger.
-              </p>
-            </div>
-            <div className="overflow-auto" style={{ maxHeight: 700 }}>
-              <NutsTable rows={filtered} mode={mapMode} />
-            </div>
+        {/* Tabell 1–2: Hållbarhetsområden + Delområden */}
+        <div className="grid grid-cols-2 gap-4">
+          <TableCard
+            title="Ärenden per hållbarhetsområde (Nivå 1)"
+            subtitle="Ett ärende kan välja flera områden och räknas då flera gånger."
+          >
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                  <TH>Hållbarhetsområde</TH>
+                  <TH right>Ärenden</TH>
+                  <TH right>Andel</TH>
+                  <TH right>Beviljat</TH>
+                  <TH right>Utbetalt</TH>
+                </tr>
+              </thead>
+              <tbody>
+                {omradeRader.map((r) => (
+                  <tr key={r.id} className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                    <TD>{r.name}</TD>
+                    <TD right mono>{formatNumber(r.antal)}</TD>
+                    <TD right mono>{formatPct(r.andel)}</TD>
+                    <TD right mono>{formatKr(r.beviljat)}</TD>
+                    <TD right mono>{formatKr(r.utbetalt)}</TD>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableCard>
+
+          <TableCard
+            title="Ärenden per delområde (Nivå 2)"
+            subtitle="Delområden där sökande angett Bidrar till = Ja."
+          >
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                  <TH>Delområde</TH>
+                  <TH>Hållbarhetsområde</TH>
+                  <TH right>Ärenden</TH>
+                  <TH right>Andel</TH>
+                </tr>
+              </thead>
+              <tbody>
+                {delomradeRader.map((r) => (
+                  <tr key={r.id} className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                    <TD>{r.name}</TD>
+                    <TD>{r.omradeNamn}</TD>
+                    <TD right mono>{formatNumber(r.antal)}</TD>
+                    <TD right mono>{formatPct(r.andel)}</TD>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableCard>
+        </div>
+
+        {/* Tabell 3–4: Utlysning + Bransch */}
+        <div className="grid grid-cols-2 gap-4">
+          <TableCard title="Ärenden per utlysning">
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                  <TH>Utlysning</TH>
+                  <TH right>Ärenden</TH>
+                  <TH right>Beviljat</TH>
+                  <TH right>Utbetalt</TH>
+                </tr>
+              </thead>
+              <tbody>
+                {utlysningRader.map((r) => (
+                  <tr key={r.name} className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                    <TD title={r.name}><span className="block max-w-[280px] truncate">{r.name}</span></TD>
+                    <TD right mono>{formatNumber(r.antal)}</TD>
+                    <TD right mono>{formatKr(r.beviljat)}</TD>
+                    <TD right mono>{formatKr(r.utbetalt)}</TD>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableCard>
+
+          <TableCard title="Ärenden per bransch">
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                  <TH>Bransch</TH>
+                  <TH right>Ärenden</TH>
+                  <TH right>Beviljat</TH>
+                  <TH right>Utbetalt</TH>
+                </tr>
+              </thead>
+              <tbody>
+                {branschRader.map((r) => (
+                  <tr key={r.name} className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                    <TD>{r.name}</TD>
+                    <TD right mono>{formatNumber(r.antal)}</TD>
+                    <TD right mono>{formatKr(r.beviljat)}</TD>
+                    <TD right mono>{formatKr(r.utbetalt)}</TD>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableCard>
+        </div>
+
+        {/* Tabell 5–6: AOS-bedömning + AOU-utfall per område */}
+        <div className="grid grid-cols-2 gap-4">
+          <TableCard
+            title="AOS – Godkännas (bedömning) per område"
+            subtitle="Antal områdesval per bedömningsnivå."
+          >
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                  <TH>Hållbarhetsområde</TH>
+                  <TH right>{AOS_SKALA['0']}</TH>
+                  <TH right>{AOS_SKALA['1']}</TH>
+                  <TH right>{AOS_SKALA['2']}</TH>
+                  <TH right>{AOS_SKALA['3']}</TH>
+                </tr>
+              </thead>
+              <tbody>
+                {aosRader.map((r) => (
+                  <tr key={r.id} className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                    <TD>{r.name}</TD>
+                    <TD right mono>{formatNumber(r.n0)}</TD>
+                    <TD right mono>{formatNumber(r.n1)}</TD>
+                    <TD right mono>{formatNumber(r.n2)}</TD>
+                    <TD right mono>{formatNumber(r.n3)}</TD>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableCard>
+
+          <TableCard
+            title="Slutlig AOU per område"
+            subtitle="Sökandes bedömning av måluppfyllelse samt andel godkända."
+          >
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                  <TH>Hållbarhetsområde</TH>
+                  <TH right>{AOU_SKALA['1']}</TH>
+                  <TH right>{AOU_SKALA['2']}</TH>
+                  <TH right>{AOU_SKALA['3']}</TH>
+                  <TH right>Godkända</TH>
+                </tr>
+              </thead>
+              <tbody>
+                {aouRader.map((r) => (
+                  <tr key={r.id} className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                    <TD>{r.name}</TD>
+                    <TD right mono>{formatNumber(r.b1)}</TD>
+                    <TD right mono>{formatNumber(r.b2)}</TD>
+                    <TD right mono>{formatNumber(r.b3)}</TD>
+                    <TD right mono>{r.bedomda > 0 ? formatPct((r.godkanda / r.bedomda) * 100) : '–'}</TD>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableCard>
+        </div>
+
+        {/* Tabell 7: Ärendelista */}
+        <TableCard
+          title="Ärendelista"
+          subtitle={`Visar ${formatNumber(arendeSida.length)} av ${formatNumber(filtered.length)} ärenden i urvalet.`}
+          maxHeight={700}
+        >
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                <TH>Ärende-id</TH>
+                <TH>Utlysning</TH>
+                <TH>Bransch</TH>
+                <TH right>Beviljat</TH>
+                <TH right>Utbetalt</TH>
+                <TH right>Hållbarhetsområden</TH>
+              </tr>
+            </thead>
+            <tbody>
+              {arendeSida.map((r) => (
+                <tr key={r.arendeid} className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                  <TD mono>{r.arendeid}</TD>
+                  <TD title={r.utlysning}><span className="block max-w-[320px] truncate">{r.utlysning}</span></TD>
+                  <TD>{r.bransch}</TD>
+                  <TD right mono>{formatKrFull(r.beviljat)}</TD>
+                  <TD right mono>{formatKrFull(r.utbetalt)}</TD>
+                  <TD right mono>{antalOmraden(r)}</TD>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="flex items-center justify-between px-4 py-3">
+            <button
+              onClick={() => setSida(Math.max(0, sidaClamped - 1))}
+              disabled={sidaClamped === 0}
+              className="px-3 py-1 text-xs font-medium rounded border disabled:opacity-40"
+              style={{ borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+            >
+              ← Föregående
+            </button>
+            <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+              Sida {sidaClamped + 1} av {antalSidor}
+            </span>
+            <button
+              onClick={() => setSida(Math.min(antalSidor - 1, sidaClamped + 1))}
+              disabled={sidaClamped >= antalSidor - 1}
+              className="px-3 py-1 text-xs font-medium rounded border disabled:opacity-40"
+              style={{ borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
+            >
+              Nästa →
+            </button>
           </div>
-
-          <div className="bg-white rounded-xl shadow-sm border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
-            <div className="px-4 pt-4 pb-2 border-b" style={{ borderColor: 'var(--color-border)' }}>
-              <h3 className="font-bold text-sm" style={{ color: 'var(--color-text)' }}>
-                Antal projekt fördelat på Nuts3 (karta)
-              </h3>
-            </div>
-            <div style={{ height: 700 }}>
-              <SwedenMapLeaflet rows={filtered} mode={mapMode} onCountyClick={handleCountyClick} />
-            </div>
-          </div>
-        </div>
-
-        {/* Rad 3: Program + Krysstabell */}
-        <div className="grid grid-cols-2 gap-4 mb-5">
-          <div className="bg-white rounded-xl shadow-sm border overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
-            <div className="px-4 pt-4 pb-2 border-b" style={{ borderColor: 'var(--color-border)' }}>
-              <h3 className="font-bold text-sm" style={{ color: 'var(--color-text)' }}>
-                Fördelning svenska partners per program
-              </h3>
-            </div>
-            <div className="overflow-auto" style={{ maxHeight: 460 }}>
-              <ProgramTable rows={filtered} />
-            </div>
-          </div>
-          <KrysstabellPartners rows={filtered} />
-        </div>
-
-        {/* Rad 4: Budget per mål */}
-        <div className="grid grid-cols-2 gap-4 mb-5">
-          <BudgetMalTabell rows={filtered} />
-        </div>
+        </TableCard>
       </main>
     </>
   );
