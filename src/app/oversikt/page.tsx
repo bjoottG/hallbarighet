@@ -11,6 +11,7 @@ import {
   kpiAntalArenden, kpiBeviljat, kpiUtbetalt, kpiAndelMedOmrade,
   kpiSnittOmraden, kpiAndelAosPositiv, kpiAndelAouGodkand,
   perOmrade, perDelomrade, perFalt, aosPerOmrade, aouPerOmrade, antalOmraden,
+  fordelningAntalOmraden,
   formatNumber, formatKr, formatKrFull, formatPct,
 } from '@/lib/dataUtils';
 import { AOS_SKALA, AOU_SKALA } from '@/types';
@@ -37,6 +38,7 @@ export default function OversiktPage() {
   const branschRader = useMemo(() => perFalt(filtered, 'bransch'), [filtered]);
   const aosRader = useMemo(() => aosPerOmrade(filtered), [filtered]);
   const aouRader = useMemo(() => aouPerOmrade(filtered), [filtered]);
+  const fordelningRader = useMemo(() => fordelningAntalOmraden(filtered), [filtered]);
 
   const antalSidor = Math.max(1, Math.ceil(filtered.length / ARENDEN_PER_SIDA));
   const sidaClamped = Math.min(sida, antalSidor - 1);
@@ -237,7 +239,47 @@ export default function OversiktPage() {
           </TableCard>
         </div>
 
-        {/* Tabell 7: Ärendelista */}
+        {/* Tabell 7: Antal hållbarhetsområden per ärende */}
+        <div className="grid grid-cols-2 gap-4">
+          <TableCard
+            title="Antal hållbarhetsområden per ärende (0–7)"
+            subtitle="Nivå 1 = området valt i ansökan. Nivå 1 + Nivå 2 = området valt och minst ett delområde angivet med Bidrar till = Ja."
+          >
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                  <TH>Antal områden</TH>
+                  <TH right>Ärenden (Nivå 1)</TH>
+                  <TH right>Andel</TH>
+                  <TH right>Ärenden (Nivå 1 + Nivå 2)</TH>
+                  <TH right>Andel</TH>
+                </tr>
+              </thead>
+              <tbody>
+                {fordelningRader.map((r) => (
+                  <tr key={r.antalOmr} className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                    <TD>{r.antalOmr}</TD>
+                    <TD right mono>{formatNumber(r.niva1)}</TD>
+                    <TD right mono>{filtered.length > 0 ? formatPct((r.niva1 / filtered.length) * 100) : '–'}</TD>
+                    <TD right mono>{formatNumber(r.niva12)}</TD>
+                    <TD right mono>{filtered.length > 0 ? formatPct((r.niva12 / filtered.length) * 100) : '–'}</TD>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="border-t-2" style={{ borderColor: 'var(--color-border)' }}>
+                  <TD>Summa</TD>
+                  <TD right mono>{formatNumber(filtered.length)}</TD>
+                  <TD right mono>{filtered.length > 0 ? formatPct(100) : '–'}</TD>
+                  <TD right mono>{formatNumber(filtered.length)}</TD>
+                  <TD right mono>{filtered.length > 0 ? formatPct(100) : '–'}</TD>
+                </tr>
+              </tfoot>
+            </table>
+          </TableCard>
+        </div>
+
+        {/* Tabell 8: Ärendelista */}
         <TableCard
           title="Ärendelista"
           subtitle={`Visar ${formatNumber(arendeSida.length)} av ${formatNumber(filtered.length)} ärenden i urvalet.`}

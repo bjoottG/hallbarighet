@@ -10,6 +10,7 @@ import { useFilters } from '@/context/FilterContext';
 import {
   kpiAntalArenden, kpiBeviljat, kpiUtbetalt,
   perOmrade, perDelomrade, perFalt, aosPerOmrade, aouPerOmrade, aosFordelning,
+  fordelningAntalOmraden,
   formatNumber, formatKr,
 } from '@/lib/dataUtils';
 import {
@@ -31,6 +32,7 @@ export default function DiagramPage() {
   const utlysningar = useMemo(() => perFalt(filtered, 'utlysning').sort((a, b) => b.beviljat - a.beviljat).slice(0, 10), [filtered]);
   const aos = useMemo(() => aosPerOmrade(filtered), [filtered]);
   const aou = useMemo(() => aouPerOmrade(filtered), [filtered]);
+  const fordelning = useMemo(() => fordelningAntalOmraden(filtered), [filtered]);
   const aosTotal = useMemo(
     () => aosFordelning(filtered).map((d) => ({ name: AOS_SKALA[d.niva], value: d.antal, niva: d.niva })).filter((d) => d.value > 0),
     [filtered],
@@ -92,6 +94,26 @@ export default function DiagramPage() {
             </ResponsiveContainer>
           </ChartCard>
         </div>
+
+        {/* Rad 1b: Antal hållbarhetsområden per ärende */}
+        <ChartCard
+          title="Antal hållbarhetsområden per ärende (0–7)"
+          subtitle="Nivå 1 = området valt i ansökan. Nivå 1 + Nivå 2 = området valt och minst ett delområde angivet med Bidrar till = Ja."
+        >
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={fordelning} margin={{ left: 4, right: 20, top: 0, bottom: 0 }}>
+              <XAxis dataKey="antalOmr" tick={{ fontSize: 11 }} tickLine={false} axisLine={false}
+                label={{ value: 'Antal hållbarhetsområden', position: 'insideBottom', offset: -2, fontSize: 11, fill: 'var(--color-text-muted)' }} />
+              <YAxis tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
+              <Tooltip contentStyle={TOOLTIP_STYLE}
+                formatter={(v, n) => [`${formatNumber(Number(v))} st`, n === 'niva1' ? 'Nivå 1' : 'Nivå 1 + Nivå 2']}
+                labelFormatter={(l) => `${l} hållbarhetsområden`} />
+              <Legend formatter={(v) => (v === 'niva1' ? 'Nivå 1' : 'Nivå 1 + Nivå 2')} wrapperStyle={{ fontSize: 11 }} />
+              <Bar dataKey="niva1" fill={DIAGRAM_COLORS[0]} radius={[3, 3, 0, 0]} maxBarSize={40} />
+              <Bar dataKey="niva12" fill={DIAGRAM_COLORS[1]} radius={[3, 3, 0, 0]} maxBarSize={40} />
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartCard>
 
         {/* Rad 2: Bransch-donut + AOS-donut */}
         <div className="grid grid-cols-2 gap-5">

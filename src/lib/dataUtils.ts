@@ -42,6 +42,26 @@ export function antalOmraden(r: Arende): number {
   return OMRADEN.reduce((s, o) => s + (r.omraden[o.id]?.valt ? 1 : 0), 0);
 }
 
+/** Antal områden där Nivå 1 = Ja och sökande angett Bidrar till = Ja för minst ett delområde (Nivå 2) */
+export function antalOmradenMedDelomrade(r: Arende): number {
+  return OMRADEN.reduce((s, o) => {
+    const d = r.omraden[o.id];
+    if (!d?.valt) return s;
+    return s + (Object.values(d.delomraden).some((v) => v === 'Ja') ? 1 : 0);
+  }, 0);
+}
+
+/** Fördelning: antal ärenden per antal valda hållbarhetsområden (0–7),
+ *  dels enligt Nivå 1, dels Nivå 1 med minst ett delområde (Nivå 2) = Ja */
+export function fordelningAntalOmraden(rows: Arende[]): { antalOmr: number; niva1: number; niva12: number }[] {
+  const result = Array.from({ length: OMRADEN.length + 1 }, (_, i) => ({ antalOmr: i, niva1: 0, niva12: 0 }));
+  for (const r of rows) {
+    result[antalOmraden(r)].niva1 += 1;
+    result[antalOmradenMedDelomrade(r)].niva12 += 1;
+  }
+  return result;
+}
+
 /** Andel ärenden med minst ett valt hållbarhetsområde (0–100) */
 export function kpiAndelMedOmrade(rows: Arende[]): number {
   if (rows.length === 0) return 0;
