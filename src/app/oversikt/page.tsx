@@ -4,11 +4,11 @@ import { useMemo, useState } from 'react';
 import Header from '@/components/Header';
 import Navigation from '@/components/Navigation';
 import FilterBar from '@/components/FilterBar';
-import KPICard from '@/components/KPICard';
+import KPICard, { KPIListCard } from '@/components/KPICard';
 import { TableCard, TH, TD } from '@/components/Cards';
 import { useFilters } from '@/context/FilterContext';
 import {
-  kpiAntalOmradesval, kpiSnittOmraden, kpiAndelAosPositiv, kpiAndelAouGodkand,
+  kpiAntalOmradesval, kpiSnittOmraden, kpiAndelAosPositiv, kpiAouBidragitAndel,
   perOmrade, perDelomrade, aosPerOmrade, aouPerOmrade, antalOmraden,
   fordelningAntalOmraden,
   formatNumber, formatKr, formatKrFull, formatPct,
@@ -25,7 +25,7 @@ export default function OversiktPage() {
     omradesval: kpiAntalOmradesval(filtered),
     snittOmraden: kpiSnittOmraden(filtered),
     andelAosPositiv: kpiAndelAosPositiv(filtered),
-    andelAouGodkand: kpiAndelAouGodkand(filtered),
+    aouBidragit: kpiAouBidragitAndel(filtered),
   }), [filtered]);
 
   const omradeRader = useMemo(() => perOmrade(filtered), [filtered]);
@@ -62,7 +62,14 @@ export default function OversiktPage() {
           <KPICard title="Valda hållbarhetsområden" value={`${formatNumber(kpis.omradesval)} områdesval`} subtitle={`Urvalet innehåller ${formatNumber(filtered.length)} ärenden`} />
           <KPICard title="Hållbarhetsområden per ärende" value={kpis.snittOmraden.toLocaleString('sv-SE', { maximumFractionDigits: 1 })} subtitle="Genomsnitt av valda hållbarhetsområden" />
           <KPICard title="Bedömda: Positiv eller Transformativt" value={formatPct(kpis.andelAosPositiv)} subtitle="Andel av bedömda områdesval (nivå 2–3)" />
-          <KPICard title="Godkända slutliga AOU" value={formatPct(kpis.andelAouGodkand)} subtitle="Andel av AOU-bedömda områdesval" />
+          <KPIListCard
+            title="Slutlig AOU – Bidragit till"
+            items={[
+              { value: formatPct(kpis.aouBidragit.p1), label: '1 – Har till största del uppnåtts' },
+              { value: formatPct(kpis.aouBidragit.p2), label: '2 – Bara vissa delar har uppnåtts' },
+            ]}
+            subtitle="Andel av AOU-bedömda områdesval"
+          />
         </div>
 
         {/* Tabell 1–2: Hållbarhetsområden + Delområden */}

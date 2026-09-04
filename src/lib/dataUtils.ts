@@ -79,20 +79,25 @@ export function kpiAndelAosPositiv(rows: Arende[]): number {
   return bedomda === 0 ? 0 : (positiva / bedomda) * 100;
 }
 
-/** Andel godkända slutliga AOU (av alla AOU-bedömda områdesval), 0–100 */
-export function kpiAndelAouGodkand(rows: Arende[]): number {
+/** Slutlig AOU – Bidragit till: andel nivå 1 respektive 2 av alla AOU-bedömda områdesval, 0–100 */
+export function kpiAouBidragitAndel(rows: Arende[]): { p1: number; p2: number } {
   let bedomda = 0;
-  let godkanda = 0;
+  let n1 = 0;
+  let n2 = 0;
   for (const r of rows) {
     for (const o of OMRADEN) {
-      const v = r.omraden[o.id]?.aouGodkannas;
+      const v = r.omraden[o.id]?.aouBidragit;
       if (v != null) {
         bedomda += 1;
-        if (v === 'Ja') godkanda += 1;
+        if (v === 1) n1 += 1;
+        if (v === 2) n2 += 1;
       }
     }
   }
-  return bedomda === 0 ? 0 : (godkanda / bedomda) * 100;
+  return {
+    p1: bedomda === 0 ? 0 : (n1 / bedomda) * 100,
+    p2: bedomda === 0 ? 0 : (n2 / bedomda) * 100,
+  };
 }
 
 // ─── Aggregeringar ──────────────────────────────────────────────────────────

@@ -4,12 +4,12 @@ import { useMemo } from 'react';
 import Header from '@/components/Header';
 import Navigation from '@/components/Navigation';
 import FilterBar from '@/components/FilterBar';
-import KPICard from '@/components/KPICard';
+import KPICard, { KPIListCard } from '@/components/KPICard';
 import { ChartCard } from '@/components/Cards';
 import { useFilters } from '@/context/FilterContext';
 import {
   kpiBeviljat, kpiAntalOmradesval,
-  kpiSnittOmraden, kpiAndelAosPositiv, kpiAndelAouGodkand,
+  kpiSnittOmraden, kpiAndelAosPositiv, kpiAouBidragitAndel,
   perOmrade, perDelomrade, aosPerOmrade, aouPerOmrade, aosFordelning,
   fordelningAntalOmraden,
   formatNumber, formatKr, formatPct,
@@ -62,7 +62,14 @@ export default function DiagramPage() {
           <KPICard title="Valda hållbarhetsområden" value={`${formatNumber(kpiAntalOmradesval(filtered))} områdesval`} subtitle={`Urvalet innehåller ${formatNumber(filtered.length)} ärenden`} />
           <KPICard title="Hållbarhetsområden per ärende" value={kpiSnittOmraden(filtered).toLocaleString('sv-SE', { maximumFractionDigits: 1 })} subtitle="Genomsnitt av valda hållbarhetsområden" />
           <KPICard title="Bedömda: Positiv eller Transformativt" value={formatPct(kpiAndelAosPositiv(filtered))} subtitle="Andel av bedömda områdesval (nivå 2–3)" />
-          <KPICard title="Godkända slutliga AOU" value={formatPct(kpiAndelAouGodkand(filtered))} subtitle="Andel av AOU-bedömda områdesval" />
+          <KPIListCard
+            title="Slutlig AOU – Bidragit till"
+            items={[
+              { value: formatPct(kpiAouBidragitAndel(filtered).p1), label: '1 – Har till största del uppnåtts' },
+              { value: formatPct(kpiAouBidragitAndel(filtered).p2), label: '2 – Bara vissa delar har uppnåtts' },
+            ]}
+            subtitle="Andel av AOU-bedömda områdesval"
+          />
         </div>
 
         {/* Rad 1: Ärenden + beviljat per hållbarhetsområde */}
