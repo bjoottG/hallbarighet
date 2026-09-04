@@ -9,12 +9,12 @@ import { ChartCard } from '@/components/Cards';
 import { useFilters } from '@/context/FilterContext';
 import {
   kpiAntalArenden, kpiBeviljat, kpiUtbetalt,
-  perOmrade, perDelomrade, perFalt, aosPerOmrade, aouPerOmrade, aosFordelning,
+  perOmrade, perDelomrade, aosPerOmrade, aouPerOmrade, aosFordelning,
   fordelningAntalOmraden,
   formatNumber, formatKr,
 } from '@/lib/dataUtils';
 import {
-  DIAGRAM_COLORS, OMRADE_FARG, AOS_FARG, AOU_FARG, AOS_SKALA, AOU_SKALA, STODTYP_NAMN,
+  DIAGRAM_COLORS, OMRADE_FARG, AOS_FARG, AOU_FARG, AOS_SKALA, AOU_SKALA,
 } from '@/types';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -28,13 +28,9 @@ export default function DiagramPage() {
 
   const omraden = useMemo(() => perOmrade(filtered), [filtered]);
   const delomraden = useMemo(() => perDelomrade(filtered).sort((a, b) => b.antal - a.antal), [filtered]);
-  const branscher = useMemo(() => perFalt(filtered, 'bransch'), [filtered]);
-  const utlysningar = useMemo(() => perFalt(filtered, 'utlysning').sort((a, b) => b.beviljat - a.beviljat).slice(0, 10), [filtered]);
   const aos = useMemo(() => aosPerOmrade(filtered), [filtered]);
   const aou = useMemo(() => aouPerOmrade(filtered), [filtered]);
   const fordelning = useMemo(() => fordelningAntalOmraden(filtered), [filtered]);
-  const stodtyper = useMemo(() => perFalt(filtered, 'stodtyp'), [filtered]);
-  const beslutandeOrg = useMemo(() => perFalt(filtered, 'beslutandeOrg'), [filtered]);
   const aosTotal = useMemo(
     () => aosFordelning(filtered).map((d) => ({ name: AOS_SKALA[d.niva], value: d.antal, niva: d.niva })).filter((d) => d.value > 0),
     [filtered],
@@ -115,98 +111,8 @@ export default function DiagramPage() {
           </ResponsiveContainer>
         </ChartCard>
 
-        {/* Rad 1c: Stödtyp */}
+        {/* Rad 2: AOS-donut */}
         <div className="grid grid-cols-2 gap-5">
-          <ChartCard title="Antal ärenden per stödtyp">
-            <div className="flex items-center justify-center" style={{ height: 240 }}>
-              <ResponsiveContainer width="55%" height={240}>
-                <PieChart>
-                  <Pie data={stodtyper} dataKey="antal" nameKey="name" cx="50%" cy="50%" outerRadius={95} innerRadius={48}>
-                    {stodtyper.map((_, i) => <Cell key={i} fill={DIAGRAM_COLORS[i % DIAGRAM_COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip contentStyle={TOOLTIP_STYLE}
-                    formatter={(v, n) => [`${formatNumber(Number(v))} st`, STODTYP_NAMN[String(n)] ?? n]} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex flex-col gap-2 text-sm">
-                {stodtyper.map((d, i) => (
-                  <div key={d.name} className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ background: DIAGRAM_COLORS[i % DIAGRAM_COLORS.length] }} />
-                    <span style={{ color: 'var(--color-text)' }}>{STODTYP_NAMN[d.name] ?? d.name}</span>
-                    <span className="font-bold ml-1" style={{ color: 'var(--color-primary)' }}>{formatNumber(d.antal)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </ChartCard>
-
-          <ChartCard title="Beviljat belopp per stödtyp">
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart layout="vertical" data={stodtyper} margin={{ left: 4, right: 70, top: 0, bottom: 0 }}>
-                <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false}
-                  tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)} mnkr`} />
-                <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} interval={0} />
-                <Tooltip contentStyle={TOOLTIP_STYLE}
-                  formatter={(v) => [formatKr(Number(v)), 'Beviljat']}
-                  labelFormatter={(l) => STODTYP_NAMN[String(l)] ?? l} />
-                <Bar dataKey="beviljat" radius={[0, 3, 3, 0]} maxBarSize={26}>
-                  {stodtyper.map((_, i) => <Cell key={i} fill={DIAGRAM_COLORS[i % DIAGRAM_COLORS.length]} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartCard>
-        </div>
-
-        {/* Rad 1d: Beslutande organisation */}
-        <div className="grid grid-cols-2 gap-5">
-          <ChartCard title="Antal ärenden per beslutande organisation">
-            <ResponsiveContainer width="100%" height={540}>
-              <BarChart layout="vertical" data={beslutandeOrg} margin={{ left: 4, right: 50, top: 0, bottom: 0 }}>
-                <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
-                <YAxis type="category" dataKey="name" width={190} tick={{ fontSize: 10 }} tickLine={false} axisLine={false} interval={0} />
-                <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => [`${formatNumber(Number(v))} st`, 'Ärenden']} />
-                <Bar dataKey="antal" fill={DIAGRAM_COLORS[3]} radius={[0, 3, 3, 0]} maxBarSize={14} />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartCard>
-
-          <ChartCard title="Beviljat belopp per beslutande organisation">
-            <ResponsiveContainer width="100%" height={540}>
-              <BarChart layout="vertical" data={[...beslutandeOrg].sort((a, b) => b.beviljat - a.beviljat)} margin={{ left: 4, right: 70, top: 0, bottom: 0 }}>
-                <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false}
-                  tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)} mnkr`} />
-                <YAxis type="category" dataKey="name" width={190} tick={{ fontSize: 10 }} tickLine={false} axisLine={false} interval={0} />
-                <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => [formatKr(Number(v)), 'Beviljat']} />
-                <Bar dataKey="beviljat" fill={DIAGRAM_COLORS[4]} radius={[0, 3, 3, 0]} maxBarSize={14} />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartCard>
-        </div>
-
-        {/* Rad 2: Bransch-donut + AOS-donut */}
-        <div className="grid grid-cols-2 gap-5">
-          <ChartCard title="Antal ärenden per bransch">
-            <div className="flex items-center justify-center" style={{ height: 240 }}>
-              <ResponsiveContainer width="55%" height={240}>
-                <PieChart>
-                  <Pie data={branscher} dataKey="antal" nameKey="name" cx="50%" cy="50%" outerRadius={95} innerRadius={48}>
-                    {branscher.map((_, i) => <Cell key={i} fill={DIAGRAM_COLORS[i % DIAGRAM_COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => [`${formatNumber(Number(v))} st`]} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex flex-col gap-2 text-sm">
-                {branscher.map((d, i) => (
-                  <div key={d.name} className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ background: DIAGRAM_COLORS[i % DIAGRAM_COLORS.length] }} />
-                    <span style={{ color: 'var(--color-text)' }}>{d.name}</span>
-                    <span className="font-bold ml-1" style={{ color: 'var(--color-primary)' }}>{formatNumber(d.antal)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </ChartCard>
-
           <ChartCard title="AOS – Godkännas (bedömning), fördelning" subtitle="Alla bedömda områdesval i urvalet">
             <div className="flex items-center justify-center" style={{ height: 240 }}>
               <ResponsiveContainer width="55%" height={240}>
@@ -264,7 +170,7 @@ export default function DiagramPage() {
           </ResponsiveContainer>
         </ChartCard>
 
-        {/* Rad 5: AOU-utfall + utlysningar */}
+        {/* Rad 5: AOU-utfall */}
         <div className="grid grid-cols-2 gap-5">
           <ChartCard title="Slutlig AOU – Bidragit till, per område" subtitle="Sökandes bedömning av måluppfyllelse">
             <ResponsiveContainer width="100%" height={300}>
@@ -276,20 +182,6 @@ export default function DiagramPage() {
                 {(['b1', 'b2', 'b3'] as const).map((k) => (
                   <Bar key={k} dataKey={k} stackId="aou" fill={AOU_FARG[k.replace('b', '')]} maxBarSize={20} />
                 ))}
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartCard>
-
-          <ChartCard title="Beviljat belopp per utlysning (topp 10)">
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart layout="vertical" data={utlysningar} margin={{ left: 4, right: 70, top: 0, bottom: 0 }}>
-                <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false}
-                  tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)} mnkr`} />
-                <YAxis type="category" dataKey="name" width={200}
-                  tick={{ fontSize: 9 }} tickLine={false} axisLine={false} interval={0}
-                  tickFormatter={(v: string) => (v.length > 34 ? v.slice(0, 33) + '…' : v)} />
-                <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => [formatKr(Number(v)), 'Beviljat']} />
-                <Bar dataKey="beviljat" fill={DIAGRAM_COLORS[2]} radius={[0, 3, 3, 0]} maxBarSize={16} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
