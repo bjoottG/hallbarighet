@@ -100,7 +100,7 @@ export default function DiagramPage() {
         {/* Rad 1b: Antal hållbarhetsområden per ärende */}
         <ChartCard
           title="Antal hållbarhetsområden per ärende (0–7)"
-          subtitle="Nivå 1 = området valt i ansökan. Nivå 1 + Nivå 2 = området valt och minst ett delområde angivet med Bidrar till = Ja."
+          subtitle="Hur många hållbarhetsområden (Nivå 1) ärendena valt i ansökan."
         >
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={fordelning} margin={{ left: 4, right: 20, top: 0, bottom: 0 }}>
@@ -108,11 +108,9 @@ export default function DiagramPage() {
                 label={{ value: 'Antal hållbarhetsområden', position: 'insideBottom', offset: -2, fontSize: 11, fill: 'var(--color-text-muted)' }} />
               <YAxis tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
               <Tooltip contentStyle={TOOLTIP_STYLE}
-                formatter={(v, n) => [`${formatNumber(Number(v))} st`, n === 'niva1' ? 'Nivå 1' : 'Nivå 1 + Nivå 2']}
+                formatter={(v) => [`${formatNumber(Number(v))} st`, 'Ärenden']}
                 labelFormatter={(l) => `${l} hållbarhetsområden`} />
-              <Legend formatter={(v) => (v === 'niva1' ? 'Nivå 1' : 'Nivå 1 + Nivå 2')} wrapperStyle={{ fontSize: 11 }} />
-              <Bar dataKey="niva1" fill={DIAGRAM_COLORS[0]} radius={[3, 3, 0, 0]} maxBarSize={40} />
-              <Bar dataKey="niva12" fill={DIAGRAM_COLORS[1]} radius={[3, 3, 0, 0]} maxBarSize={40} />
+              <Bar dataKey="antal" fill={DIAGRAM_COLORS[0]} radius={[3, 3, 0, 0]} maxBarSize={40} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>

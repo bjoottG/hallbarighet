@@ -243,15 +243,13 @@ export default function OversiktPage() {
         <div className="grid grid-cols-2 gap-4">
           <TableCard
             title="Antal hållbarhetsområden per ärende (0–7)"
-            subtitle="Nivå 1 = området valt i ansökan. Nivå 1 + Nivå 2 = området valt och minst ett delområde angivet med Bidrar till = Ja."
+            subtitle="Hur många hållbarhetsområden (Nivå 1) ärendena valt i ansökan."
           >
             <table className="w-full text-xs border-collapse">
               <thead>
                 <tr className="border-b" style={{ borderColor: 'var(--color-border)' }}>
                   <TH>Antal områden</TH>
-                  <TH right>Ärenden (Nivå 1)</TH>
-                  <TH right>Andel</TH>
-                  <TH right>Ärenden (Nivå 1 + Nivå 2)</TH>
+                  <TH right>Ärenden</TH>
                   <TH right>Andel</TH>
                 </tr>
               </thead>
@@ -259,18 +257,14 @@ export default function OversiktPage() {
                 {fordelningRader.map((r) => (
                   <tr key={r.antalOmr} className="border-b" style={{ borderColor: 'var(--color-border)' }}>
                     <TD>{r.antalOmr}</TD>
-                    <TD right mono>{formatNumber(r.niva1)}</TD>
-                    <TD right mono>{filtered.length > 0 ? formatPct((r.niva1 / filtered.length) * 100) : '–'}</TD>
-                    <TD right mono>{formatNumber(r.niva12)}</TD>
-                    <TD right mono>{filtered.length > 0 ? formatPct((r.niva12 / filtered.length) * 100) : '–'}</TD>
+                    <TD right mono>{formatNumber(r.antal)}</TD>
+                    <TD right mono>{filtered.length > 0 ? formatPct((r.antal / filtered.length) * 100) : '–'}</TD>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr className="border-t-2" style={{ borderColor: 'var(--color-border)' }}>
                   <TD>Summa</TD>
-                  <TD right mono>{formatNumber(filtered.length)}</TD>
-                  <TD right mono>{filtered.length > 0 ? formatPct(100) : '–'}</TD>
                   <TD right mono>{formatNumber(filtered.length)}</TD>
                   <TD right mono>{filtered.length > 0 ? formatPct(100) : '–'}</TD>
                 </tr>
