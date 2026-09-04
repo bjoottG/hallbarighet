@@ -8,11 +8,11 @@ import KPICard from '@/components/KPICard';
 import { ChartCard } from '@/components/Cards';
 import { useFilters } from '@/context/FilterContext';
 import {
-  kpiAntalArenden, kpiBeviljat, kpiUtbetalt, kpiAndelMedOmrade,
+  kpiBeviljat, kpiAndelMedOmrade,
   kpiSnittOmraden, kpiAndelAosPositiv, kpiAndelAouGodkand,
   perOmrade, perDelomrade, aosPerOmrade, aouPerOmrade, aosFordelning,
   fordelningAntalOmraden,
-  formatNumber, formatKr, formatKrFull, formatPct,
+  formatNumber, formatKr, formatPct,
 } from '@/lib/dataUtils';
 import {
   DIAGRAM_COLORS, OMRADE_FARG, AOS_FARG, AOU_FARG, AOS_SKALA, AOU_SKALA,
@@ -59,9 +59,6 @@ export default function DiagramPage() {
 
         {/* KPI-rad (samma som Översikt) */}
         <div className="grid grid-cols-4 gap-4">
-          <KPICard title="Antal ärenden" value={`${formatNumber(kpiAntalArenden(filtered))} st`} />
-          <KPICard title="Beviljat belopp" value={formatKr(kpiBeviljat(filtered))} subtitle={formatKrFull(kpiBeviljat(filtered))} />
-          <KPICard title="Utbetalt belopp" value={formatKr(kpiUtbetalt(filtered))} subtitle={formatKrFull(kpiUtbetalt(filtered))} />
           <KPICard title="Ärenden med hållbarhetsområde" value={formatPct(kpiAndelMedOmrade(filtered))} subtitle="Andel med minst ett valt område (Nivå 1)" />
           <KPICard title="Områden per ärende" value={kpiSnittOmraden(filtered).toLocaleString('sv-SE', { maximumFractionDigits: 1 })} subtitle="Genomsnitt av valda hållbarhetsområden" />
           <KPICard title="AOS: Positiv eller Transformativt" value={formatPct(kpiAndelAosPositiv(filtered))} subtitle="Andel av bedömda områdesval (nivå 2–3)" />

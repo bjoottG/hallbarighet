@@ -8,9 +8,8 @@ import KPICard from '@/components/KPICard';
 import { TableCard, TH, TD } from '@/components/Cards';
 import { useFilters } from '@/context/FilterContext';
 import {
-  kpiAntalArenden, kpiBeviljat, kpiUtbetalt, kpiAndelMedOmrade,
-  kpiSnittOmraden, kpiAndelAosPositiv, kpiAndelAouGodkand,
-  perOmrade, perDelomrade, perFalt, aosPerOmrade, aouPerOmrade, antalOmraden,
+  kpiAndelMedOmrade, kpiSnittOmraden, kpiAndelAosPositiv, kpiAndelAouGodkand,
+  perOmrade, perDelomrade, aosPerOmrade, aouPerOmrade, antalOmraden,
   fordelningAntalOmraden,
   formatNumber, formatKr, formatKrFull, formatPct,
 } from '@/lib/dataUtils';
@@ -23,9 +22,6 @@ export default function OversiktPage() {
   const [sida, setSida] = useState(0);
 
   const kpis = useMemo(() => ({
-    arenden: kpiAntalArenden(filtered),
-    beviljat: kpiBeviljat(filtered),
-    utbetalt: kpiUtbetalt(filtered),
     andelMedOmrade: kpiAndelMedOmrade(filtered),
     snittOmraden: kpiSnittOmraden(filtered),
     andelAosPositiv: kpiAndelAosPositiv(filtered),
@@ -34,8 +30,6 @@ export default function OversiktPage() {
 
   const omradeRader = useMemo(() => perOmrade(filtered), [filtered]);
   const delomradeRader = useMemo(() => perDelomrade(filtered).sort((a, b) => b.antal - a.antal), [filtered]);
-  const utlysningRader = useMemo(() => perFalt(filtered, 'utlysning'), [filtered]);
-  const branschRader = useMemo(() => perFalt(filtered, 'bransch'), [filtered]);
   const aosRader = useMemo(() => aosPerOmrade(filtered), [filtered]);
   const aouRader = useMemo(() => aouPerOmrade(filtered), [filtered]);
   const fordelningRader = useMemo(() => fordelningAntalOmraden(filtered), [filtered]);
@@ -63,11 +57,8 @@ export default function OversiktPage() {
       <FilterBar />
 
       <main className="max-w-[1200px] mx-auto px-6 py-5 flex flex-col gap-5">
-        {/* KPI-rad: 7 rutor */}
+        {/* KPI-rad */}
         <div className="grid grid-cols-4 gap-4">
-          <KPICard title="Antal ärenden" value={`${formatNumber(kpis.arenden)} st`} />
-          <KPICard title="Beviljat belopp" value={formatKr(kpis.beviljat)} subtitle={formatKrFull(kpis.beviljat)} />
-          <KPICard title="Utbetalt belopp" value={formatKr(kpis.utbetalt)} subtitle={formatKrFull(kpis.utbetalt)} />
           <KPICard title="Ärenden med hållbarhetsområde" value={formatPct(kpis.andelMedOmrade)} subtitle="Andel med minst ett valt område (Nivå 1)" />
           <KPICard title="Områden per ärende" value={kpis.snittOmraden.toLocaleString('sv-SE', { maximumFractionDigits: 1 })} subtitle="Genomsnitt av valda hållbarhetsområden" />
           <KPICard title="AOS: Positiv eller Transformativt" value={formatPct(kpis.andelAosPositiv)} subtitle="Andel av bedömda områdesval (nivå 2–3)" />
@@ -124,55 +115,6 @@ export default function OversiktPage() {
                     <TD>{r.omradeNamn}</TD>
                     <TD right mono>{formatNumber(r.antal)}</TD>
                     <TD right mono>{formatPct(r.andel)}</TD>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </TableCard>
-        </div>
-
-        {/* Tabell 3–4: Utlysning + Bransch */}
-        <div className="grid grid-cols-2 gap-4">
-          <TableCard title="Ärenden per utlysning">
-            <table className="w-full text-xs border-collapse">
-              <thead>
-                <tr className="border-b" style={{ borderColor: 'var(--color-border)' }}>
-                  <TH>Utlysning</TH>
-                  <TH right>Ärenden</TH>
-                  <TH right>Beviljat</TH>
-                  <TH right>Utbetalt</TH>
-                </tr>
-              </thead>
-              <tbody>
-                {utlysningRader.map((r) => (
-                  <tr key={r.name} className="border-b" style={{ borderColor: 'var(--color-border)' }}>
-                    <TD title={r.name}><span className="block max-w-[280px] truncate">{r.name}</span></TD>
-                    <TD right mono>{formatNumber(r.antal)}</TD>
-                    <TD right mono>{formatKr(r.beviljat)}</TD>
-                    <TD right mono>{formatKr(r.utbetalt)}</TD>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </TableCard>
-
-          <TableCard title="Ärenden per bransch">
-            <table className="w-full text-xs border-collapse">
-              <thead>
-                <tr className="border-b" style={{ borderColor: 'var(--color-border)' }}>
-                  <TH>Bransch</TH>
-                  <TH right>Ärenden</TH>
-                  <TH right>Beviljat</TH>
-                  <TH right>Utbetalt</TH>
-                </tr>
-              </thead>
-              <tbody>
-                {branschRader.map((r) => (
-                  <tr key={r.name} className="border-b" style={{ borderColor: 'var(--color-border)' }}>
-                    <TD>{r.name}</TD>
-                    <TD right mono>{formatNumber(r.antal)}</TD>
-                    <TD right mono>{formatKr(r.beviljat)}</TD>
-                    <TD right mono>{formatKr(r.utbetalt)}</TD>
                   </tr>
                 ))}
               </tbody>
