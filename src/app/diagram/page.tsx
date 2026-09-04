@@ -236,8 +236,8 @@ export default function DiagramPage() {
                 <Tooltip contentStyle={TOOLTIP_STYLE}
                   formatter={(v, n) => [`${formatNumber(Number(v))} st`, n === 'ja' ? 'Godkänd – Ja' : 'Godkänd – Nej']} />
                 <Legend formatter={(v) => (v === 'ja' ? 'Godkänd – Ja' : 'Godkänd – Nej')} wrapperStyle={{ fontSize: 10 }} />
-                <Bar dataKey="ja" stackId="aoug" fill="#00A896" maxBarSize={20} />
-                <Bar dataKey="nej" stackId="aoug" fill="#D64550" radius={[0, 3, 3, 0]} maxBarSize={20} />
+                <Bar dataKey="ja" stackId="aoug" fill="#4A1B8B" maxBarSize={20} />
+                <Bar dataKey="nej" stackId="aoug" fill="#C9C4D4" radius={[0, 3, 3, 0]} maxBarSize={20} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
