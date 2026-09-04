@@ -19,10 +19,11 @@ import {
 } from '@/types';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend,
+  PieChart, Pie, Cell, Legend, LabelList,
 } from 'recharts';
 
 const TOOLTIP_STYLE = { fontSize: 11, borderRadius: 8 };
+const LABEL_STYLE = { fontSize: 10, fill: 'var(--color-text-muted)' };
 
 export default function DiagramPage() {
   const { filtered, isLoading } = useFilters();
@@ -85,6 +86,7 @@ export default function DiagramPage() {
                 <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => [`${formatNumber(Number(v))} st`, 'Ärenden']} />
                 <Bar dataKey="antal" radius={[0, 3, 3, 0]} maxBarSize={22}>
                   {omraden.map((d) => <Cell key={d.id} fill={OMRADE_FARG[d.id]} />)}
+                  <LabelList dataKey="antal" position="right" style={LABEL_STYLE} formatter={(v: React.ReactNode) => formatNumber(Number(v))} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -102,6 +104,7 @@ export default function DiagramPage() {
                 <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => [formatKr(Number(v)), 'Beviljat']} />
                 <Bar dataKey="beviljat" radius={[0, 3, 3, 0]} maxBarSize={22}>
                   {omraden.map((d) => <Cell key={d.id} fill={OMRADE_FARG[d.id]} />)}
+                  <LabelList dataKey="beviljat" position="right" style={LABEL_STYLE} formatter={(v: React.ReactNode) => formatKr(Number(v))} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -121,7 +124,9 @@ export default function DiagramPage() {
               <Tooltip contentStyle={TOOLTIP_STYLE}
                 formatter={(v) => [`${formatNumber(Number(v))} st`, 'Ärenden']}
                 labelFormatter={(l) => `${l} hållbarhetsområden`} />
-              <Bar dataKey="antal" fill={DIAGRAM_COLORS[0]} radius={[3, 3, 0, 0]} maxBarSize={40} />
+              <Bar dataKey="antal" fill={DIAGRAM_COLORS[0]} radius={[3, 3, 0, 0]} maxBarSize={40}>
+                <LabelList dataKey="antal" position="top" style={LABEL_STYLE} formatter={(v: React.ReactNode) => formatNumber(Number(v))} />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -160,7 +165,11 @@ export default function DiagramPage() {
               <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v, n) => [`${formatNumber(Number(v))} st`, AOS_SKALA[String(n).replace('n', '')]]} />
               <Legend formatter={(v) => AOS_SKALA[String(v).replace('n', '')]} wrapperStyle={{ fontSize: 11 }} />
               {(['n0', 'n1', 'n2', 'n3'] as const).map((k) => (
-                <Bar key={k} dataKey={k} stackId="aos" fill={AOS_FARG[k.replace('n', '')]} maxBarSize={22} />
+                <Bar key={k} dataKey={k} stackId="aos" fill={AOS_FARG[k.replace('n', '')]} maxBarSize={22}>
+                  {k === 'n3' && (
+                    <LabelList dataKey="total" position="right" style={LABEL_STYLE} formatter={(v: React.ReactNode) => formatNumber(Number(v))} />
+                  )}
+                </Bar>
               ))}
             </BarChart>
           </ResponsiveContainer>
@@ -180,6 +189,7 @@ export default function DiagramPage() {
                 }} />
               <Bar dataKey="antal" radius={[0, 3, 3, 0]} maxBarSize={14}>
                 {delomraden.map((d) => <Cell key={d.id} fill={OMRADE_FARG[d.omradeId]} />)}
+                <LabelList dataKey="antal" position="right" style={LABEL_STYLE} formatter={(v: React.ReactNode) => formatNumber(Number(v))} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
