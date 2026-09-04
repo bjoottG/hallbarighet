@@ -8,7 +8,7 @@ import KPICard from '@/components/KPICard';
 import { ChartCard } from '@/components/Cards';
 import { useFilters } from '@/context/FilterContext';
 import {
-  kpiBeviljat, kpiAndelMedOmrade,
+  kpiBeviljat, kpiAntalOmradesval,
   kpiSnittOmraden, kpiAndelAosPositiv, kpiAndelAouGodkand,
   perOmrade, perDelomrade, aosPerOmrade, aouPerOmrade, aosFordelning,
   fordelningAntalOmraden,
@@ -59,8 +59,8 @@ export default function DiagramPage() {
 
         {/* KPI-rad (samma som Översikt) */}
         <div className="grid grid-cols-4 gap-4">
-          <KPICard title="Ärenden med hållbarhetsområde" value={formatPct(kpiAndelMedOmrade(filtered))} subtitle="Andel med minst ett valt område (Nivå 1)" />
-          <KPICard title="Områden per ärende" value={kpiSnittOmraden(filtered).toLocaleString('sv-SE', { maximumFractionDigits: 1 })} subtitle="Genomsnitt av valda hållbarhetsområden" />
+          <KPICard title="Valda hållbarhetsområden" value={`${formatNumber(kpiAntalOmradesval(filtered))} områdesval`} subtitle={`Urvalet innehåller ${formatNumber(filtered.length)} ärenden`} />
+          <KPICard title="Hållbarhetsområden per ärende" value={kpiSnittOmraden(filtered).toLocaleString('sv-SE', { maximumFractionDigits: 1 })} subtitle="Genomsnitt av valda hållbarhetsområden" />
           <KPICard title="AOS: Positiv eller Transformativt" value={formatPct(kpiAndelAosPositiv(filtered))} subtitle="Andel av bedömda områdesval (nivå 2–3)" />
           <KPICard title="Godkända slutliga AOU" value={formatPct(kpiAndelAouGodkand(filtered))} subtitle="Andel av AOU-bedömda områdesval" />
         </div>
@@ -69,7 +69,7 @@ export default function DiagramPage() {
         <div className="grid grid-cols-2 gap-5">
           <ChartCard
             title="Antal ärenden per hållbarhetsområde"
-            subtitle={`Obs! Staplarna överlappar: ett ärende som valt flera områden räknas i varje stapel. Staplarna summerar till ${formatNumber(omraden.reduce((s, d) => s + d.antal, 0))} områdesval — urvalet innehåller ${formatNumber(filtered.length)} ärenden.`}
+            subtitle={`Obs! Staplarna överlappar: ett ärende som valt flera hållbarhetsområden räknas i varje stapel. Staplarna summerar till ${formatNumber(omraden.reduce((s, d) => s + d.antal, 0))} områdesval — urvalet innehåller ${formatNumber(filtered.length)} ärenden.`}
           >
             <ResponsiveContainer width="100%" height={260}>
               <BarChart layout="vertical" data={omraden} margin={{ left: 4, right: 50, top: 0, bottom: 0 }}>
@@ -85,7 +85,7 @@ export default function DiagramPage() {
 
           <ChartCard
             title="Beviljat belopp per hållbarhetsområde"
-            subtitle={`Obs! Staplarna överlappar: hela ärendets beviljade belopp räknas i varje valt område. Staplarna summerar till ${formatKr(omraden.reduce((s, d) => s + d.beviljat, 0))} — urvalets beviljade belopp är ${formatKr(kpiBeviljat(filtered))}.`}
+            subtitle={`Obs! Staplarna överlappar: hela ärendets beviljade belopp räknas i varje valt hållbarhetsområde. Staplarna summerar till ${formatKr(omraden.reduce((s, d) => s + d.beviljat, 0))} — urvalets beviljade belopp är ${formatKr(kpiBeviljat(filtered))}.`}
           >
             <ResponsiveContainer width="100%" height={260}>
               <BarChart layout="vertical" data={omraden} margin={{ left: 4, right: 70, top: 0, bottom: 0 }}>
@@ -180,7 +180,7 @@ export default function DiagramPage() {
 
         {/* Rad 5: AOU-utfall */}
         <div className="grid grid-cols-2 gap-5">
-          <ChartCard title="Slutlig AOU – Bidragit till, per område" subtitle="Sökandes bedömning av måluppfyllelse">
+          <ChartCard title="Slutlig AOU – Bidragit till, per hållbarhetsområde" subtitle="Sökandes bedömning av måluppfyllelse">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart layout="vertical" data={aou} margin={{ left: 4, right: 50, top: 0, bottom: 0 }}>
                 <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />

@@ -54,7 +54,7 @@ const TERMS: Term[] = [
   {
     term: 'Hållbarhetsområde (Nivå 1)',
     category: 'Hållbarhet',
-    definition: 'Ett av sju övergripande hållbarhetsområden som en sökande kan ange att ärendet bidrar till: Klimat och miljö, Cirkularitet och effektivt resursnyttjande, Hållbar konsumtion och marknad, Social inkludering och jämlikhet, Hälsa och välbefinnande, Ekonomisk hållbarhet samt Motverka hunger och fattigdom. Ett ärende kan välja flera områden.',
+    definition: 'Ett av sju övergripande hållbarhetsområden som en sökande kan ange att ärendet bidrar till: Klimat och miljö, Cirkularitet och effektivt resursnyttjande, Hållbar konsumtion och marknad, Social inkludering och jämlikhet, Hälsa och välbefinnande, Ekonomisk hållbarhet samt Motverka hunger och fattigdom. Ett ärende kan välja flera hållbarhetsområden.',
   },
   {
     term: 'Delområde (Nivå 2)',
@@ -74,12 +74,12 @@ const TERMS: Term[] = [
   {
     term: 'AOS – Godkännas (bedömning)',
     category: 'Bedömning',
-    definition: 'Handläggarens bedömning av ärendets bidrag till ett valt hållbarhetsområde, på skalan 0 Nej, 1 Hänsyn, 2 Positiv påverkan, 3 Transformativt. Vid bedömningen 0 följs området inte upp vidare.',
+    definition: 'Handläggarens bedömning av ärendets bidrag till ett valt hållbarhetsområde, på skalan 0 Nej, 1 Hänsyn, 2 Positiv påverkan, 3 Transformativt. Vid bedömningen 0 följs hållbarhetsområdet inte upp vidare.',
   },
   {
     term: 'Bedömningsskala AOS (0–3)',
     category: 'Bedömning',
-    definition: '0 Nej = området godkänns inte som hållbarhetsinsats. 1 Hänsyn = insatsen tar hänsyn till området. 2 Positiv påverkan = insatsen har en positiv påverkan på området. 3 Transformativt = insatsen bedöms vara transformativ inom området.',
+    definition: '0 Nej = hållbarhetsområdet godkänns inte som hållbarhetsinsats. 1 Hänsyn = insatsen tar hänsyn till hållbarhetsområdet. 2 Positiv påverkan = insatsen har en positiv påverkan på hållbarhetsområdet. 3 Transformativt = insatsen bedöms vara transformativ inom hållbarhetsområdet.',
   },
   {
     term: 'AOU – Ansökan om utbetalning',
@@ -94,7 +94,7 @@ const TERMS: Term[] = [
   {
     term: 'Slutlig AOU – Godkännas (bedömning)',
     category: 'Bedömning',
-    definition: 'Handläggarens slutliga bedömning (Ja/Nej) av om ärendets hållbarhetsarbete inom området kan godkännas vid ansökan om utbetalning.',
+    definition: 'Handläggarens slutliga bedömning (Ja/Nej) av om ärendets arbete inom hållbarhetsområdet kan godkännas vid ansökan om utbetalning.',
   },
   {
     term: 'Agenda 2030',

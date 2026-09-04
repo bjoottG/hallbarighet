@@ -52,13 +52,12 @@ export function fordelningAntalOmraden(rows: Arende[]): { antalOmr: number; anta
   return result;
 }
 
-/** Andel ärenden med minst ett valt hållbarhetsområde (0–100) */
-export function kpiAndelMedOmrade(rows: Arende[]): number {
-  if (rows.length === 0) return 0;
-  return (rows.filter((r) => antalOmraden(r) > 0).length / rows.length) * 100;
+/** Totalt antal områdesval (summan av valda hållbarhetsområden över alla ärenden) */
+export function kpiAntalOmradesval(rows: Arende[]): number {
+  return rows.reduce((s, r) => s + antalOmraden(r), 0);
 }
 
-/** Genomsnittligt antal valda områden per ärende */
+/** Genomsnittligt antal valda hållbarhetsområden per ärende */
 export function kpiSnittOmraden(rows: Arende[]): number {
   if (rows.length === 0) return 0;
   return rows.reduce((s, r) => s + antalOmraden(r), 0) / rows.length;

@@ -8,7 +8,7 @@ import KPICard from '@/components/KPICard';
 import { TableCard, TH, TD } from '@/components/Cards';
 import { useFilters } from '@/context/FilterContext';
 import {
-  kpiAndelMedOmrade, kpiSnittOmraden, kpiAndelAosPositiv, kpiAndelAouGodkand,
+  kpiAntalOmradesval, kpiSnittOmraden, kpiAndelAosPositiv, kpiAndelAouGodkand,
   perOmrade, perDelomrade, aosPerOmrade, aouPerOmrade, antalOmraden,
   fordelningAntalOmraden,
   formatNumber, formatKr, formatKrFull, formatPct,
@@ -22,7 +22,7 @@ export default function OversiktPage() {
   const [sida, setSida] = useState(0);
 
   const kpis = useMemo(() => ({
-    andelMedOmrade: kpiAndelMedOmrade(filtered),
+    omradesval: kpiAntalOmradesval(filtered),
     snittOmraden: kpiSnittOmraden(filtered),
     andelAosPositiv: kpiAndelAosPositiv(filtered),
     andelAouGodkand: kpiAndelAouGodkand(filtered),
@@ -59,8 +59,8 @@ export default function OversiktPage() {
       <main className="max-w-[1200px] mx-auto px-6 py-5 flex flex-col gap-5">
         {/* KPI-rad */}
         <div className="grid grid-cols-4 gap-4">
-          <KPICard title="Ärenden med hållbarhetsområde" value={formatPct(kpis.andelMedOmrade)} subtitle="Andel med minst ett valt område (Nivå 1)" />
-          <KPICard title="Områden per ärende" value={kpis.snittOmraden.toLocaleString('sv-SE', { maximumFractionDigits: 1 })} subtitle="Genomsnitt av valda hållbarhetsområden" />
+          <KPICard title="Valda hållbarhetsområden" value={`${formatNumber(kpis.omradesval)} områdesval`} subtitle={`Urvalet innehåller ${formatNumber(filtered.length)} ärenden`} />
+          <KPICard title="Hållbarhetsområden per ärende" value={kpis.snittOmraden.toLocaleString('sv-SE', { maximumFractionDigits: 1 })} subtitle="Genomsnitt av valda hållbarhetsområden" />
           <KPICard title="AOS: Positiv eller Transformativt" value={formatPct(kpis.andelAosPositiv)} subtitle="Andel av bedömda områdesval (nivå 2–3)" />
           <KPICard title="Godkända slutliga AOU" value={formatPct(kpis.andelAouGodkand)} subtitle="Andel av AOU-bedömda områdesval" />
         </div>
@@ -69,7 +69,7 @@ export default function OversiktPage() {
         <div className="grid grid-cols-2 gap-4">
           <TableCard
             title="Ärenden per hållbarhetsområde (Nivå 1)"
-            subtitle="Ett ärende kan välja flera områden och räknas då flera gånger."
+            subtitle="Ett ärende kan välja flera hållbarhetsområden och räknas då flera gånger."
           >
             <table className="w-full text-xs border-collapse">
               <thead>
@@ -125,7 +125,7 @@ export default function OversiktPage() {
         {/* Tabell 5–6: AOS-bedömning + AOU-utfall per område */}
         <div className="grid grid-cols-2 gap-4">
           <TableCard
-            title="AOS – Godkännas (bedömning) per område"
+            title="AOS – Godkännas (bedömning) per hållbarhetsområde"
             subtitle="Antal områdesval per bedömningsnivå."
           >
             <table className="w-full text-xs border-collapse">
@@ -153,7 +153,7 @@ export default function OversiktPage() {
           </TableCard>
 
           <TableCard
-            title="Slutlig AOU per område"
+            title="Slutlig AOU per hållbarhetsområde"
             subtitle="Sökandes bedömning av måluppfyllelse samt andel godkända."
           >
             <table className="w-full text-xs border-collapse">
@@ -190,7 +190,7 @@ export default function OversiktPage() {
             <table className="w-full text-xs border-collapse">
               <thead>
                 <tr className="border-b" style={{ borderColor: 'var(--color-border)' }}>
-                  <TH>Antal områden</TH>
+                  <TH>Antal hållbarhetsområden</TH>
                   <TH right>Ärenden</TH>
                   <TH right>Andel</TH>
                 </tr>

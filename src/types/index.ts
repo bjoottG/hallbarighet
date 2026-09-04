@@ -87,7 +87,7 @@ export const AOS_SKALA: Record<string, string> = {
 };
 
 export const AOS_BESKRIVNING: Record<string, string> = {
-  '0': 'Bedömningen godkänner inte området som hållbarhetsinsats',
+  '0': 'Bedömningen godkänner inte hållbarhetsområdet som hållbarhetsinsats',
   '1': 'Insatsen tar hänsyn till hållbarhetsområdet',
   '2': 'Insatsen har en positiv påverkan på hållbarhetsområdet',
   '3': 'Insatsen är transformativ inom hållbarhetsområdet',
