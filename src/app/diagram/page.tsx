@@ -94,9 +94,7 @@ export default function DiagramPage() {
                 <Tooltip contentStyle={TOOLTIP_STYLE}
                   formatter={(v, n) => [`${formatNumber(Number(v))} st`, n === 'bedomd123' ? 'Bedömd påverkansgrad 1–3' : 'Ej godkänd i bedömning']} />
                 <Legend formatter={(v) => (v === 'bedomd123' ? 'Bedömd påverkansgrad 1–3 (Hänsyn/Positiv/Transformativt)' : 'Ej godkänd i bedömning')} wrapperStyle={{ fontSize: 11 }} />
-                <Bar dataKey="bedomd123" stackId="omr" maxBarSize={22}>
-                  {omradenBedomning.map((d) => <Cell key={d.id} fill={OMRADE_FARG[d.id]} />)}
-                </Bar>
+                <Bar dataKey="bedomd123" stackId="omr" fill="#4A1B8B" maxBarSize={22} />
                 <Bar dataKey="bedomd0" stackId="omr" fill="#C9C4D4" radius={[0, 3, 3, 0]} maxBarSize={22}>
                   <LabelList dataKey="total" position="right" style={LABEL_STYLE} formatter={(v: React.ReactNode) => formatNumber(Number(v))} />
                 </Bar>
