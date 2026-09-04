@@ -132,7 +132,7 @@ export default function OversiktPage() {
         {/* Tabell 5–6: AOS-bedömning + AOU-utfall per område */}
         <div className="grid grid-cols-2 gap-4">
           <TableCard
-            title="AOS – Godkännas (bedömning) per hållbarhetsområde"
+            title="Bedömning per hållbarhetsområde"
             subtitle="Antal områdesval per bedömningsnivå."
           >
             <table className="w-full text-xs border-collapse">

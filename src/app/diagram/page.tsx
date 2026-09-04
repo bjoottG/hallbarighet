@@ -92,8 +92,8 @@ export default function DiagramPage() {
                 <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
                 <YAxis type="category" dataKey="name" width={220} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} interval={0} />
                 <Tooltip contentStyle={TOOLTIP_STYLE}
-                  formatter={(v, n) => [`${formatNumber(Number(v))} st`, n === 'bedomd123' ? 'AOS-bedömning 1–3' : 'AOS-bedömning 0 – Nej']} />
-                <Legend formatter={(v) => (v === 'bedomd123' ? 'AOS-bedömning 1–3 (Hänsyn/Positiv/Transformativt)' : 'AOS-bedömning 0 – Nej')} wrapperStyle={{ fontSize: 11 }} />
+                  formatter={(v, n) => [`${formatNumber(Number(v))} st`, n === 'bedomd123' ? 'Bedömd påverkansgrad 1–3' : 'Ej godkänd i bedömning']} />
+                <Legend formatter={(v) => (v === 'bedomd123' ? 'Bedömd påverkansgrad 1–3 (Hänsyn/Positiv/Transformativt)' : 'Ej godkänd i bedömning')} wrapperStyle={{ fontSize: 11 }} />
                 <Bar dataKey="bedomd123" stackId="omr" maxBarSize={22}>
                   {omradenBedomning.map((d) => <Cell key={d.id} fill={OMRADE_FARG[d.id]} />)}
                 </Bar>
@@ -145,7 +145,7 @@ export default function DiagramPage() {
 
         {/* Rad 2: AOS-donut */}
         <div className="grid grid-cols-2 gap-5">
-          <ChartCard title="AOS – Godkännas (bedömning), fördelning" subtitle="Alla bedömda områdesval i urvalet">
+          <ChartCard title="Bedömning, fördelning" subtitle="Alla bedömda områdesval i urvalet">
             <div className="flex items-center justify-center" style={{ height: 240 }}>
               <ResponsiveContainer width="55%" height={240}>
                 <PieChart>
@@ -169,7 +169,7 @@ export default function DiagramPage() {
         </div>
 
         {/* Rad 3: AOS-bedömning per område (staplat) */}
-        <ChartCard title="AOS – Godkännas (bedömning) per hållbarhetsområde" subtitle="Antal områdesval per bedömningsnivå">
+        <ChartCard title="Bedömning per hållbarhetsområde" subtitle="Antal områdesval per bedömningsnivå">
           <ResponsiveContainer width="100%" height={300}>
             <BarChart layout="vertical" data={aos} margin={{ left: 4, right: 50, top: 0, bottom: 0 }}>
               <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />

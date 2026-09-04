@@ -65,7 +65,7 @@ export default function FilterBar({ alignLeft }: { alignLeft?: boolean }) {
             getDescription={(v) => OMRADE_NAMN[DELOMRADE_OMRADE[v]] ?? ''}
           />
           <MultiSelectDropdown
-            label="AOS – Godkännas (bedömning)"
+            label="Bedömning"
             options={AOS_OPTIONS}
             selected={filters.aosBedomning}
             onChange={(v) => setFilter('aosBedomning', v)}

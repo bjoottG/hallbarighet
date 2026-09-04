@@ -72,7 +72,7 @@ const TERMS: Term[] = [
     definition: 'Sökandes egen uppgift i ansökan om att ärendet bidrar till ett visst delområde (Ja/Nej). Lämnas bara för hållbarhetsområden som valts på Nivå 1.',
   },
   {
-    term: 'AOS – Godkännas (bedömning)',
+    term: 'Bedömning (AOS – Godkännas)',
     category: 'Bedömning',
     definition: 'Handläggarens bedömning av ärendets bidrag till ett valt hållbarhetsområde, på skalan 0 Nej, 1 Hänsyn, 2 Positiv påverkan, 3 Transformativt. Vid bedömningen 0 följs hållbarhetsområdet inte upp vidare.',
   },
