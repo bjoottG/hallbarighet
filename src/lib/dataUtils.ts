@@ -169,6 +169,45 @@ export function perDelomrade(rows: Arende[]): DelomradeRad[] {
   return result;
 }
 
+export interface OverlappRad {
+  id: string;
+  name: string;
+  /** Ärenden som enbart valt detta område */
+  enbart: number;
+  /** Ärenden som valt detta område och minst ett till */
+  delat: number;
+  beviljatEnbart: number;
+  beviljatDelat: number;
+}
+
+/** Per område: uppdelning i ärenden som enbart valt området respektive delar ärendet med andra områden */
+export function overlappPerOmrade(rows: Arende[]): OverlappRad[] {
+  return OMRADEN.map((o) => {
+    const valda = rows.filter((r) => r.omraden[o.id]?.valt);
+    const enbartRader = valda.filter((r) => antalOmraden(r) === 1);
+    const delatRader = valda.filter((r) => antalOmraden(r) > 1);
+    return {
+      id: o.id,
+      name: `${o.nummer}. ${o.namn}`,
+      enbart: enbartRader.length,
+      delat: delatRader.length,
+      beviljatEnbart: enbartRader.reduce((s, r) => s + (r.beviljat || 0), 0),
+      beviljatDelat: delatRader.reduce((s, r) => s + (r.beviljat || 0), 0),
+    };
+  });
+}
+
+/** Överlappsmatris: antal ärenden som valt både område i och område j (diagonalen = alla som valt området) */
+export function overlappMatris(rows: Arende[]): { id: string; name: string; counts: Record<string, number> }[] {
+  return OMRADEN.map((a) => {
+    const counts: Record<string, number> = {};
+    for (const b of OMRADEN) {
+      counts[b.id] = rows.filter((r) => r.omraden[a.id]?.valt && r.omraden[b.id]?.valt).length;
+    }
+    return { id: a.id, name: `${a.nummer}. ${a.namn}`, counts };
+  });
+}
+
 /** Krysstabell: antal AOS-bedömningar per område och nivå 0–3 */
 export function aosPerOmrade(rows: Arende[]): { id: string; name: string; n0: number; n1: number; n2: number; n3: number; total: number }[] {
   return OMRADEN.map((o) => {

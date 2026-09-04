@@ -10,7 +10,7 @@ import { useFilters } from '@/context/FilterContext';
 import {
   kpiAntalArenden, kpiBeviljat, kpiUtbetalt,
   perOmrade, perDelomrade, aosPerOmrade, aouPerOmrade, aosFordelning,
-  fordelningAntalOmraden,
+  fordelningAntalOmraden, overlappPerOmrade, overlappMatris,
   formatNumber, formatKr,
 } from '@/lib/dataUtils';
 import {
@@ -31,6 +31,8 @@ export default function DiagramPage() {
   const aos = useMemo(() => aosPerOmrade(filtered), [filtered]);
   const aou = useMemo(() => aouPerOmrade(filtered), [filtered]);
   const fordelning = useMemo(() => fordelningAntalOmraden(filtered), [filtered]);
+  const overlapp = useMemo(() => overlappPerOmrade(filtered), [filtered]);
+  const matris = useMemo(() => overlappMatris(filtered), [filtered]);
   const aosTotal = useMemo(
     () => aosFordelning(filtered).map((d) => ({ name: AOS_SKALA[d.niva], value: d.antal, niva: d.niva })).filter((d) => d.value > 0),
     [filtered],
@@ -65,7 +67,10 @@ export default function DiagramPage() {
 
         {/* Rad 1: Ärenden + beviljat per hållbarhetsområde */}
         <div className="grid grid-cols-2 gap-5">
-          <ChartCard title="Antal ärenden per hållbarhetsområde" subtitle="Ärenden som valt området (Nivå 1 = Ja)">
+          <ChartCard
+            title="Antal ärenden per hållbarhetsområde"
+            subtitle={`Obs! Staplarna överlappar: ett ärende som valt flera områden räknas i varje stapel. Staplarna summerar till ${formatNumber(omraden.reduce((s, d) => s + d.antal, 0))} områdesval — urvalet innehåller ${formatNumber(filtered.length)} ärenden.`}
+          >
             <ResponsiveContainer width="100%" height={260}>
               <BarChart layout="vertical" data={omraden} margin={{ left: 4, right: 50, top: 0, bottom: 0 }}>
                 <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
@@ -78,7 +83,10 @@ export default function DiagramPage() {
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="Beviljat belopp per hållbarhetsområde" subtitle="Summa beviljat för ärenden som valt området">
+          <ChartCard
+            title="Beviljat belopp per hållbarhetsområde"
+            subtitle={`Obs! Staplarna överlappar: hela ärendets beviljade belopp räknas i varje valt område. Staplarna summerar till ${formatKr(omraden.reduce((s, d) => s + d.beviljat, 0))} — urvalets beviljade belopp är ${formatKr(kpiBeviljat(filtered))}.`}
+          >
             <ResponsiveContainer width="100%" height={260}>
               <BarChart layout="vertical" data={omraden} margin={{ left: 4, right: 70, top: 0, bottom: 0 }}>
                 <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false}
@@ -92,6 +100,98 @@ export default function DiagramPage() {
             </ResponsiveContainer>
           </ChartCard>
         </div>
+
+        {/* Rad 1a: Överlapp mellan hållbarhetsområden */}
+        <div className="grid grid-cols-2 gap-5">
+          <ChartCard
+            title="Överlapp: antal ärenden per hållbarhetsområde"
+            subtitle="Varje stapel uppdelad i ärenden som enbart valt området respektive ärenden som även valt andra områden."
+          >
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart layout="vertical" data={overlapp} margin={{ left: 4, right: 50, top: 0, bottom: 0 }}>
+                <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
+                <YAxis type="category" dataKey="name" width={200} tick={{ fontSize: 10 }} tickLine={false} axisLine={false} interval={0} />
+                <Tooltip contentStyle={TOOLTIP_STYLE}
+                  formatter={(v, n) => [`${formatNumber(Number(v))} st`, n === 'enbart' ? 'Enbart detta område' : 'Delar ärende med andra områden']} />
+                <Legend formatter={(v) => (v === 'enbart' ? 'Enbart detta område' : 'Delar ärende med andra områden')} wrapperStyle={{ fontSize: 11 }} />
+                <Bar dataKey="enbart" stackId="o" fill="#4A1B8B" maxBarSize={20} />
+                <Bar dataKey="delat" stackId="o" fill="#C9C4D4" radius={[0, 3, 3, 0]} maxBarSize={20} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
+
+          <ChartCard
+            title="Överlapp: beviljat belopp per hållbarhetsområde"
+            subtitle="Beviljat belopp uppdelat i ärenden som enbart valt området respektive ärenden som även valt andra områden."
+          >
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart layout="vertical" data={overlapp} margin={{ left: 4, right: 70, top: 0, bottom: 0 }}>
+                <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false}
+                  tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)} mnkr`} />
+                <YAxis type="category" dataKey="name" width={200} tick={{ fontSize: 10 }} tickLine={false} axisLine={false} interval={0} />
+                <Tooltip contentStyle={TOOLTIP_STYLE}
+                  formatter={(v, n) => [formatKr(Number(v)), n === 'beviljatEnbart' ? 'Enbart detta område' : 'Delar ärende med andra områden']} />
+                <Legend formatter={(v) => (v === 'beviljatEnbart' ? 'Enbart detta område' : 'Delar ärende med andra områden')} wrapperStyle={{ fontSize: 11 }} />
+                <Bar dataKey="beviljatEnbart" stackId="b" fill="#00A896" maxBarSize={20} />
+                <Bar dataKey="beviljatDelat" stackId="b" fill="#B7E1DC" radius={[0, 3, 3, 0]} maxBarSize={20} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        </div>
+
+        {/* Rad 1a2: Överlappsmatris */}
+        <ChartCard
+          title="Överlappsmatris: ärenden med båda områdena valda"
+          subtitle="Cellen visar antal ärenden som valt både radens och kolumnens hållbarhetsområde. Diagonalen visar samtliga ärenden som valt området."
+        >
+          {(() => {
+            const maxOffDiag = Math.max(1, ...matris.flatMap((rad) =>
+              matris.filter((k) => k.id !== rad.id).map((k) => rad.counts[k.id]),
+            ));
+            return (
+              <div className="overflow-x-auto">
+                <table className="text-xs border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="text-left py-1.5 pr-3 font-semibold" style={{ color: 'var(--color-text-muted)' }}>Område</th>
+                      {matris.map((k) => (
+                        <th key={k.id} className="text-center py-1.5 px-1 font-semibold w-14" style={{ color: 'var(--color-text-muted)' }} title={k.name}>
+                          {k.name.split('.')[0]}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {matris.map((rad) => (
+                      <tr key={rad.id}>
+                        <td className="py-1 pr-3 whitespace-nowrap" style={{ color: 'var(--color-text)' }}>{rad.name}</td>
+                        {matris.map((kol) => {
+                          const v = rad.counts[kol.id];
+                          const diagonal = rad.id === kol.id;
+                          const alpha = diagonal ? 0 : Math.min(0.9, (v / maxOffDiag) * 0.9);
+                          return (
+                            <td
+                              key={kol.id}
+                              className="text-center py-1.5 px-1 font-mono rounded"
+                              title={`${rad.name} × ${kol.name}: ${formatNumber(v)} ärenden`}
+                              style={{
+                                background: diagonal ? 'var(--color-kpi-bg)' : `rgba(74, 27, 139, ${alpha})`,
+                                color: !diagonal && alpha > 0.45 ? '#fff' : 'var(--color-text)',
+                                fontWeight: diagonal ? 700 : 400,
+                              }}
+                            >
+                              {formatNumber(v)}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })()}
+        </ChartCard>
 
         {/* Rad 1b: Antal hållbarhetsområden per ärende */}
         <ChartCard
