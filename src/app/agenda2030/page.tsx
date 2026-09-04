@@ -12,6 +12,7 @@ import {
 } from '@/lib/dataUtils';
 import {
   OMRADEN, OMRADE_FARG, AGENDA_MAL_NAMN, AGENDA_MAL_FARG, DELOMRADE_NAMN,
+  AGENDA_MAL_AKTUELLA,
 } from '@/types';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
@@ -111,6 +112,64 @@ export default function Agenda2030Page() {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* Omvända relationer: Agenda 2030-mål → hållbarhetsområden → delområden */}
+        <section>
+          <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--color-text)' }}>
+            Från Agenda 2030-mål till hållbarhetsområden
+          </h2>
+          <p className="text-sm mb-4 max-w-[820px]" style={{ color: 'var(--color-text-muted)' }}>
+            Samma koppling sedd från målens håll: för varje globalt mål visas vilka hållbarhetsområden
+            och delområden som hör till målet.
+          </p>
+
+          <div className="grid grid-cols-3 gap-4">
+            {AGENDA_MAL_AKTUELLA.map((mal) => {
+              const omradenForMal = OMRADEN
+                .map((o) => ({
+                  omrade: o,
+                  delomraden: o.delomraden.filter((d) => d.agenda2030.includes(mal)),
+                }))
+                .filter((g) => g.delomraden.length > 0);
+              const antalDelomraden = omradenForMal.reduce((s, g) => s + g.delomraden.length, 0);
+              return (
+                <div
+                  key={mal}
+                  className="bg-white rounded-xl shadow-sm border p-4"
+                  style={{ borderColor: 'var(--color-border)', borderTop: `3px solid ${AGENDA_MAL_FARG[mal]}` }}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <MalBadge mal={mal} />
+                    <h3 className="font-bold text-sm" style={{ color: 'var(--color-text)' }}>
+                      {AGENDA_MAL_NAMN[mal]}
+                    </h3>
+                  </div>
+                  <p className="text-xs mb-3" style={{ color: 'var(--color-text-muted)' }}>
+                    {omradenForMal.length} {omradenForMal.length === 1 ? 'hållbarhetsområde' : 'hållbarhetsområden'},{' '}
+                    {antalDelomraden} {antalDelomraden === 1 ? 'delområde' : 'delområden'}
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {omradenForMal.map(({ omrade, delomraden }) => (
+                      <div key={omrade.id}>
+                        <div className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: 'var(--color-text)' }}>
+                          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: OMRADE_FARG[omrade.id] }} />
+                          {omrade.nummer}. {omrade.namn}
+                        </div>
+                        <ul className="mt-0.5 ml-3.5 flex flex-col gap-0.5">
+                          {delomraden.map((d) => (
+                            <li key={d.id} className="text-xs" style={{ color: 'var(--color-text-muted)' }} title={d.beskrivning}>
+                              {d.namn}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
 
