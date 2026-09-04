@@ -102,7 +102,6 @@ export const AOU_SKALA: Record<string, string> = {
 export const STODTYP_NAMN: Record<string, string> = {
   PROJ: 'PROJ – Projektstöd',
   FTG: 'FTG – Företagsstöd',
-  'EU21-27': 'EU21-27 – EU-program 2021–2027',
 };
 
 // ─── Agenda 2030 ─────────────────────────────────────────────────────────────

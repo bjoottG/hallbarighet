@@ -24,7 +24,7 @@ const TERMS: Term[] = [
   {
     term: 'Stödtyp',
     category: 'Grunddata',
-    definition: 'Typ av stöd som ärendet avser: PROJ = projektstöd, FTG = företagsstöd, EU21-27 = stöd inom EU-programperioden 2021–2027.',
+    definition: 'Typ av stöd som ärendet avser: PROJ = projektstöd, FTG = företagsstöd.',
   },
   {
     term: 'Beslutande organisation',
