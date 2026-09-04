@@ -289,6 +289,8 @@ export default function OversiktPage() {
             <thead>
               <tr className="border-b" style={{ borderColor: 'var(--color-border)' }}>
                 <TH>Ärende-id</TH>
+                <TH>Stödtyp</TH>
+                <TH>Beslutande organisation</TH>
                 <TH>Utlysning</TH>
                 <TH>Bransch</TH>
                 <TH right>Beviljat</TH>
@@ -300,7 +302,9 @@ export default function OversiktPage() {
               {arendeSida.map((r) => (
                 <tr key={r.arendeid} className="border-b" style={{ borderColor: 'var(--color-border)' }}>
                   <TD mono>{r.arendeid}</TD>
-                  <TD title={r.utlysning}><span className="block max-w-[320px] truncate">{r.utlysning}</span></TD>
+                  <TD>{r.stodtyp}</TD>
+                  <TD>{r.beslutandeOrg}</TD>
+                  <TD title={r.utlysning}><span className="block max-w-[240px] truncate">{r.utlysning}</span></TD>
                   <TD>{r.bransch}</TD>
                   <TD right mono>{formatKrFull(r.beviljat)}</TD>
                   <TD right mono>{formatKrFull(r.utbetalt)}</TD>

@@ -21,6 +21,7 @@ export interface OmradeData {
 export interface Arende {
   arendeid: number;
   stodtyp: string;
+  beslutandeOrg: string;
   utlysning: string;
   beviljat: number;
   utbetalt: number;
@@ -31,6 +32,8 @@ export interface Arende {
 // ─── Filter ──────────────────────────────────────────────────────────────────
 
 export interface FilterState {
+  stodtyp: string[];
+  beslutandeOrg: string[];
   utlysning: string[];
   bransch: string[];
   omrade: string[];        // område-id (Nivå 1)
@@ -42,6 +45,8 @@ export interface FilterState {
 }
 
 export const FILTER_DEFAULTS: FilterState = {
+  stodtyp: [],
+  beslutandeOrg: [],
   utlysning: [],
   bransch: [],
   omrade: [],
@@ -92,6 +97,12 @@ export const AOU_SKALA: Record<string, string> = {
   '1': '1 – Har till största del uppnåtts',
   '2': '2 – Bara vissa delar har uppnåtts',
   '3': '3 – Har ej uppnåtts',
+};
+
+export const STODTYP_NAMN: Record<string, string> = {
+  PROJ: 'PROJ – Projektstöd',
+  FTG: 'FTG – Företagsstöd',
+  'EU21-27': 'EU21-27 – EU-program 2021–2027',
 };
 
 // ─── Agenda 2030 ─────────────────────────────────────────────────────────────

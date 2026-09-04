@@ -14,7 +14,7 @@ import {
   formatNumber, formatKr,
 } from '@/lib/dataUtils';
 import {
-  DIAGRAM_COLORS, OMRADE_FARG, AOS_FARG, AOU_FARG, AOS_SKALA, AOU_SKALA,
+  DIAGRAM_COLORS, OMRADE_FARG, AOS_FARG, AOU_FARG, AOS_SKALA, AOU_SKALA, STODTYP_NAMN,
 } from '@/types';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -33,6 +33,8 @@ export default function DiagramPage() {
   const aos = useMemo(() => aosPerOmrade(filtered), [filtered]);
   const aou = useMemo(() => aouPerOmrade(filtered), [filtered]);
   const fordelning = useMemo(() => fordelningAntalOmraden(filtered), [filtered]);
+  const stodtyper = useMemo(() => perFalt(filtered, 'stodtyp'), [filtered]);
+  const beslutandeOrg = useMemo(() => perFalt(filtered, 'beslutandeOrg'), [filtered]);
   const aosTotal = useMemo(
     () => aosFordelning(filtered).map((d) => ({ name: AOS_SKALA[d.niva], value: d.antal, niva: d.niva })).filter((d) => d.value > 0),
     [filtered],
@@ -114,6 +116,74 @@ export default function DiagramPage() {
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
+
+        {/* Rad 1c: Stödtyp */}
+        <div className="grid grid-cols-2 gap-5">
+          <ChartCard title="Antal ärenden per stödtyp">
+            <div className="flex items-center justify-center" style={{ height: 240 }}>
+              <ResponsiveContainer width="55%" height={240}>
+                <PieChart>
+                  <Pie data={stodtyper} dataKey="antal" nameKey="name" cx="50%" cy="50%" outerRadius={95} innerRadius={48}>
+                    {stodtyper.map((_, i) => <Cell key={i} fill={DIAGRAM_COLORS[i % DIAGRAM_COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip contentStyle={TOOLTIP_STYLE}
+                    formatter={(v, n) => [`${formatNumber(Number(v))} st`, STODTYP_NAMN[String(n)] ?? n]} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex flex-col gap-2 text-sm">
+                {stodtyper.map((d, i) => (
+                  <div key={d.name} className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ background: DIAGRAM_COLORS[i % DIAGRAM_COLORS.length] }} />
+                    <span style={{ color: 'var(--color-text)' }}>{STODTYP_NAMN[d.name] ?? d.name}</span>
+                    <span className="font-bold ml-1" style={{ color: 'var(--color-primary)' }}>{formatNumber(d.antal)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </ChartCard>
+
+          <ChartCard title="Beviljat belopp per stödtyp">
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart layout="vertical" data={stodtyper} margin={{ left: 4, right: 70, top: 0, bottom: 0 }}>
+                <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false}
+                  tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)} mnkr`} />
+                <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} interval={0} />
+                <Tooltip contentStyle={TOOLTIP_STYLE}
+                  formatter={(v) => [formatKr(Number(v)), 'Beviljat']}
+                  labelFormatter={(l) => STODTYP_NAMN[String(l)] ?? l} />
+                <Bar dataKey="beviljat" radius={[0, 3, 3, 0]} maxBarSize={26}>
+                  {stodtyper.map((_, i) => <Cell key={i} fill={DIAGRAM_COLORS[i % DIAGRAM_COLORS.length]} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        </div>
+
+        {/* Rad 1d: Beslutande organisation */}
+        <div className="grid grid-cols-2 gap-5">
+          <ChartCard title="Antal ärenden per beslutande organisation">
+            <ResponsiveContainer width="100%" height={540}>
+              <BarChart layout="vertical" data={beslutandeOrg} margin={{ left: 4, right: 50, top: 0, bottom: 0 }}>
+                <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
+                <YAxis type="category" dataKey="name" width={190} tick={{ fontSize: 10 }} tickLine={false} axisLine={false} interval={0} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => [`${formatNumber(Number(v))} st`, 'Ärenden']} />
+                <Bar dataKey="antal" fill={DIAGRAM_COLORS[3]} radius={[0, 3, 3, 0]} maxBarSize={14} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
+
+          <ChartCard title="Beviljat belopp per beslutande organisation">
+            <ResponsiveContainer width="100%" height={540}>
+              <BarChart layout="vertical" data={[...beslutandeOrg].sort((a, b) => b.beviljat - a.beviljat)} margin={{ left: 4, right: 70, top: 0, bottom: 0 }}>
+                <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false}
+                  tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)} mnkr`} />
+                <YAxis type="category" dataKey="name" width={190} tick={{ fontSize: 10 }} tickLine={false} axisLine={false} interval={0} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => [formatKr(Number(v)), 'Beviljat']} />
+                <Bar dataKey="beviljat" fill={DIAGRAM_COLORS[4]} radius={[0, 3, 3, 0]} maxBarSize={14} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        </div>
 
         {/* Rad 2: Bransch-donut + AOS-donut */}
         <div className="grid grid-cols-2 gap-5">

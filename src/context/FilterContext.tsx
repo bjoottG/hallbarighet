@@ -15,6 +15,8 @@ interface FilterContextValue {
   error: string | null;
   allUtlysningar: string[];
   allBranscher: string[];
+  allStodtyper: string[];
+  allBeslutandeOrg: string[];
 }
 
 const FilterContext = createContext<FilterContextValue | null>(null);
@@ -43,6 +45,8 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
 
   const filtered = React.useMemo(() => {
     return data.filter((row) => {
+      if (filters.stodtyp.length > 0 && !filters.stodtyp.includes(row.stodtyp)) return false;
+      if (filters.beslutandeOrg.length > 0 && !filters.beslutandeOrg.includes(row.beslutandeOrg)) return false;
       if (filters.utlysning.length > 0 && !filters.utlysning.includes(row.utlysning)) return false;
       if (filters.bransch.length > 0 && !filters.bransch.includes(row.bransch)) return false;
 
@@ -103,9 +107,17 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
     () => Array.from(new Set(data.map((r) => r.bransch))).sort((a, b) => a.localeCompare(b, 'sv')),
     [data],
   );
+  const allStodtyper = React.useMemo(
+    () => Array.from(new Set(data.map((r) => r.stodtyp))).sort((a, b) => a.localeCompare(b, 'sv')),
+    [data],
+  );
+  const allBeslutandeOrg = React.useMemo(
+    () => Array.from(new Set(data.map((r) => r.beslutandeOrg))).sort((a, b) => a.localeCompare(b, 'sv')),
+    [data],
+  );
 
   return (
-    <FilterContext.Provider value={{ data, filtered, filters, setFilter, resetFilters, isLoading, error, allUtlysningar, allBranscher }}>
+    <FilterContext.Provider value={{ data, filtered, filters, setFilter, resetFilters, isLoading, error, allUtlysningar, allBranscher, allStodtyper, allBeslutandeOrg }}>
       {children}
     </FilterContext.Provider>
   );

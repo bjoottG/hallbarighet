@@ -15,7 +15,7 @@ Rådata ligger i `data/`:
 
 | Fil | Innehåll |
 |---|---|
-| `hallbarhetsomraden_ver3.xlsx` | 950 ärenden med grunddata och hållbarhetsval (Nivå 1/Nivå 2, AOS- och AOU-bedömningar) |
+| `hallbarhetsomraden_ver4.xlsx` | 950 ärenden med grunddata (inkl. stödtyp och beslutande organisation) och hållbarhetsval (Nivå 1/Nivå 2, AOS- och AOU-bedömningar) |
 | `hallbarhetsområden_agend2030.xlsx` | Definitioner av områden och delområden samt koppling till Agenda 2030-målen |
 | `hallbarhetsomraden._niva1_niva2xlsx.xlsx` | Referens: Nivå 1/Nivå 2-strukturen |
 
@@ -29,7 +29,7 @@ Skriptet läser Excelfilerna och genererar `public/data/rawdata.json` (ärenden)
 
 ## Filter
 
-Alla tabeller och diagram styrs av filtren: Utlysning, Bransch, Hållbarhetsområde (Nivå 1), Delområde (Nivå 2), AOS – Godkännas (bedömning), Slutlig AOU – Bidragit till, Slutlig AOU – Godkänd samt Agenda 2030-mål.
+Alla tabeller och diagram styrs av filtren: Stödtyp, Beslutande organisation, Utlysning, Bransch, Hållbarhetsområde (Nivå 1), Delområde (Nivå 2), AOS – Godkännas (bedömning), Slutlig AOU – Bidragit till, Slutlig AOU – Godkänd samt Agenda 2030-mål.
 
 ## Utveckling
 

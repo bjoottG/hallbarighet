@@ -2,7 +2,7 @@
  * Konverterar rådata-Excel till appens datafiler.
  *
  * Läser:
- *   data/hallbarhetsomraden_ver3.xlsx        → ärenderader
+ *   data/hallbarhetsomraden_ver4.xlsx        → ärenderader
  *   data/hallbarhetsområden_agend2030.xlsx   → definitioner (områden, delområden, Agenda 2030-mål)
  *
  * Skriver:
@@ -53,16 +53,16 @@ const OMRADEN = AREA_ORDER.map((id) => areas.get(id));
 // (AOS – Bidrar till), därefter AOS – Godkännas (0–3), Slutlig AOU – Bidragit
 // till (1–3) och Slutlig AOU – Godkännas [Ja/Nej].
 const BLOCKS = [
-  { id: 'climate',     flag: 6,  subs: [7, 8, 9, 10] },
-  { id: 'circularity', flag: 14, subs: [15, 16, 17] },
-  { id: 'consumption', flag: 21, subs: [22, 23] },
-  { id: 'inclusion',   flag: 27, subs: [28, 29, 30] },
-  { id: 'health',      flag: 34, subs: [35, 36, 37] },
-  { id: 'economy',     flag: 41, subs: [42, 43, 44] },
-  { id: 'poverty',     flag: 48, subs: [49, 50] },
+  { id: 'climate',     flag: 7,  subs: [8, 9, 10, 11] },
+  { id: 'circularity', flag: 15, subs: [16, 17, 18] },
+  { id: 'consumption', flag: 22, subs: [23, 24] },
+  { id: 'inclusion',   flag: 28, subs: [29, 30, 31] },
+  { id: 'health',      flag: 35, subs: [36, 37, 38] },
+  { id: 'economy',     flag: 42, subs: [43, 44, 45] },
+  { id: 'poverty',     flag: 49, subs: [50, 51] },
 ];
 
-const dataWb = XLSX.readFile(join(root, 'data/hallbarhetsomraden_ver3.xlsx'));
+const dataWb = XLSX.readFile(join(root, 'data/hallbarhetsomraden_ver4.xlsx'));
 const raw = XLSX.utils.sheet_to_json(dataWb.Sheets[dataWb.SheetNames[0]], { header: 1, defval: null });
 const dataRows = raw.slice(3); // rad 1–3 är rubriker
 
@@ -91,10 +91,11 @@ const arenden = dataRows
     return {
       arendeid: r[0],
       stodtyp: r[1],
-      utlysning: r[2],
-      beviljat: num(r[3]) ?? 0,
-      utbetalt: num(r[4]) ?? 0,
-      bransch: r[5],
+      beslutandeOrg: r[2],
+      utlysning: r[3],
+      beviljat: num(r[4]) ?? 0,
+      utbetalt: num(r[5]) ?? 0,
+      bransch: r[6],
       omraden,
     };
   });

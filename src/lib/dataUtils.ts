@@ -115,8 +115,8 @@ export interface GruppRad {
   utbetalt: number;
 }
 
-/** Gruppera ärenden på ett grundfält (utlysning, bransch, stödtyp) */
-export function perFalt(rows: Arende[], key: 'utlysning' | 'bransch' | 'stodtyp'): GruppRad[] {
+/** Gruppera ärenden på ett grundfält (utlysning, bransch, stödtyp, beslutande organisation) */
+export function perFalt(rows: Arende[], key: 'utlysning' | 'bransch' | 'stodtyp' | 'beslutandeOrg'): GruppRad[] {
   const map = new Map<string, GruppRad>();
   for (const r of rows) {
     const k = r[key] || 'Okänd';

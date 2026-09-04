@@ -4,7 +4,7 @@ import { useFilters } from '@/context/FilterContext';
 import MultiSelectDropdown from './MultiSelectDropdown';
 import {
   OMRADEN, OMRADE_NAMN, DELOMRADE_NAMN, DELOMRADE_OMRADE,
-  AOS_SKALA, AOS_BESKRIVNING, AOU_SKALA,
+  AOS_SKALA, AOS_BESKRIVNING, AOU_SKALA, STODTYP_NAMN,
   AGENDA_MAL_NAMN, AGENDA_MAL_AKTUELLA,
 } from '@/types';
 
@@ -16,7 +16,7 @@ const AOU_GODKAND_OPTIONS = ['Ja', 'Nej'];
 const AGENDA_OPTIONS = AGENDA_MAL_AKTUELLA.map(String);
 
 export default function FilterBar({ alignLeft }: { alignLeft?: boolean }) {
-  const { filters, setFilter, resetFilters, allUtlysningar, allBranscher } = useFilters();
+  const { filters, setFilter, resetFilters, allUtlysningar, allBranscher, allStodtyper, allBeslutandeOrg } = useFilters();
 
   const hasFilters = Object.values(filters).some((v) => v.length > 0);
 
@@ -24,6 +24,19 @@ export default function FilterBar({ alignLeft }: { alignLeft?: boolean }) {
     <div className="border-b" style={{ borderColor: 'var(--color-border)', background: '#EEEAF6' }}>
       <div className={`${alignLeft ? '' : 'max-w-[1200px] mx-auto'} px-6 py-4`}>
         <div className="grid grid-cols-4 gap-3">
+          <MultiSelectDropdown
+            label="Stödtyp"
+            options={allStodtyper}
+            selected={filters.stodtyp}
+            onChange={(v) => setFilter('stodtyp', v)}
+            getLabel={(v) => STODTYP_NAMN[v] ?? v}
+          />
+          <MultiSelectDropdown
+            label="Beslutande organisation"
+            options={allBeslutandeOrg}
+            selected={filters.beslutandeOrg}
+            onChange={(v) => setFilter('beslutandeOrg', v)}
+          />
           <MultiSelectDropdown
             label="Utlysning"
             options={allUtlysningar}
