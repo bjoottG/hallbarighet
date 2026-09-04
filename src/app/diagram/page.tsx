@@ -57,7 +57,7 @@ export default function DiagramPage() {
 
       <main className="max-w-[1200px] mx-auto px-6 py-5 flex flex-col gap-5">
 
-        {/* KPI-rad (samma som Översikt) */}
+        {/* KPI-rad (samma som Tabeller) */}
         <div className="grid grid-cols-4 gap-4">
           <KPICard title="Valda hållbarhetsområden" value={`${formatNumber(kpiAntalOmradesval(filtered))} områdesval`} subtitle={`Urvalet innehåller ${formatNumber(filtered.length)} ärenden`} />
           <KPICard title="Hållbarhetsområden per ärende" value={kpiSnittOmraden(filtered).toLocaleString('sv-SE', { maximumFractionDigits: 1 })} subtitle="Genomsnitt av valda hållbarhetsområden" />

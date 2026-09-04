@@ -4,8 +4,8 @@ Dashboard för hållbarhetsdata i Tillväxtverkets ärenden, byggd med [Next.js]
 
 ## Innehåll
 
-- **Översikt** – 7 KPI-rutor och 7 filterstyrda tabeller (hållbarhetsområden, delområden, utlysningar, branscher, AOS-bedömning, AOU-utfall, ärendelista).
-- **Diagram** – filterstyrda diagram över områden, delområden, branscher, AOS-bedömningar, AOU-utfall och utlysningar.
+- **Diagram** – KPI-rutor och filterstyrda diagram över hållbarhetsområden, delområden, AOS-bedömningar och AOU-utfall.
+- **Tabeller** – samma KPI-rutor och filterstyrda tabeller (hållbarhetsområden, delområden, AOS-bedömning, AOU-utfall, ärendelista).
 - **Agenda 2030** – relationerna hållbarhetsområde → delområde → globala mål, med KPI:er, diagram och tabell per mål.
 - **Ordlista** – begrepp och definitioner, inklusive de sju hållbarhetsområdena.
 
