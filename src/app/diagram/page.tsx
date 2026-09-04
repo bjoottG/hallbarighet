@@ -128,10 +128,10 @@ export default function DiagramPage() {
           title="Antal hållbarhetsområden per ärende (0–7)"
           subtitle="Hur många hållbarhetsområden (Nivå 1) ärendena valt i ansökan."
         >
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={fordelning} margin={{ left: 4, right: 20, top: 0, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={fordelning} margin={{ left: 4, right: 20, top: 18, bottom: 24 }}>
               <XAxis dataKey="antalOmr" tick={{ fontSize: 11 }} tickLine={false} axisLine={false}
-                label={{ value: 'Antal hållbarhetsområden', position: 'insideBottom', offset: -2, fontSize: 11, fill: 'var(--color-text-muted)' }} />
+                label={{ value: 'Antal hållbarhetsområden', position: 'insideBottom', offset: -16, fontSize: 11, fill: 'var(--color-text-muted)' }} />
               <YAxis tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
               <Tooltip contentStyle={TOOLTIP_STYLE}
                 formatter={(v) => [`${formatNumber(Number(v))} st`, 'Ärenden']}
