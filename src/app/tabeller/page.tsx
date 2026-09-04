@@ -59,7 +59,7 @@ export default function OversiktPage() {
       <main className="max-w-[1200px] mx-auto px-6 py-5 flex flex-col gap-5">
         {/* KPI-rad */}
         <div className="grid grid-cols-4 gap-4">
-          <KPICard title="Valda hållbarhetsområden" value={`${formatNumber(kpis.omradesval)} områdesval`} subtitle={`Urvalet innehåller ${formatNumber(filtered.length)} ärenden`} />
+          <KPICard title="Valda hållbarhetsområden" value={`${formatNumber(kpis.omradesval)} i ${formatNumber(filtered.length)} ärenden`} subtitle={`I genomsnitt ${kpis.snittOmraden.toLocaleString('sv-SE', { maximumFractionDigits: 1 })} per ärende`} />
           <KPICard title="Hållbarhetsområden per ärende" value={kpis.snittOmraden.toLocaleString('sv-SE', { maximumFractionDigits: 1 })} subtitle="Genomsnitt av valda hållbarhetsområden" />
           <KPICard title="Påverkansgrad: Positiv eller Transformativt" value={formatPct(kpis.andelAosPositiv)} subtitle="Andel av valda hållbarhetsområden (nivå 2–3)" />
           <KPIListCard
