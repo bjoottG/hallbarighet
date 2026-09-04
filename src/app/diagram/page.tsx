@@ -62,7 +62,7 @@ export default function DiagramPage() {
         <div className="grid grid-cols-4 gap-4">
           <KPICard title="Valda hållbarhetsområden" value={`${formatNumber(kpiAntalOmradesval(filtered))} st`} subtitle={`I genomsnitt ${kpiSnittOmraden(filtered).toLocaleString('sv-SE', { maximumFractionDigits: 1 })} per ärende`} />
           <KPICard title="Antal ärenden" value={`${formatNumber(filtered.length)} st`} subtitle="Ärenden i det filtrerade urvalet" />
-          <KPICard title="Påverkansgrad: Positiv eller Transformativt" value={formatPct(kpiAndelAosPositiv(filtered))} subtitle="Andel av valda hållbarhetsområden (nivå 2–3)" />
+          <KPICard title="Bedömd påverkansgrad: Positiv eller Transformativt" value={formatPct(kpiAndelAosPositiv(filtered))} subtitle="Andel av valda hållbarhetsområden (nivå 2–3)" />
           <KPIListCard
             title="Slutlig AOU – Bidragit till"
             items={[

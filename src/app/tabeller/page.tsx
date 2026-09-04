@@ -61,7 +61,7 @@ export default function OversiktPage() {
         <div className="grid grid-cols-4 gap-4">
           <KPICard title="Valda hållbarhetsområden" value={`${formatNumber(kpis.omradesval)} st`} subtitle={`I genomsnitt ${kpis.snittOmraden.toLocaleString('sv-SE', { maximumFractionDigits: 1 })} per ärende`} />
           <KPICard title="Antal ärenden" value={`${formatNumber(filtered.length)} st`} subtitle="Ärenden i det filtrerade urvalet" />
-          <KPICard title="Påverkansgrad: Positiv eller Transformativt" value={formatPct(kpis.andelAosPositiv)} subtitle="Andel av valda hållbarhetsområden (nivå 2–3)" />
+          <KPICard title="Bedömd påverkansgrad: Positiv eller Transformativt" value={formatPct(kpis.andelAosPositiv)} subtitle="Andel av valda hållbarhetsområden (nivå 2–3)" />
           <KPIListCard
             title="Slutlig AOU – Bidragit till"
             items={[
