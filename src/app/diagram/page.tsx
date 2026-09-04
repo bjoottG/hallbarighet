@@ -32,6 +32,13 @@ export default function DiagramPage() {
   const delomraden = useMemo(() => perDelomrade(filtered).sort((a, b) => b.antal - a.antal), [filtered]);
   const aos = useMemo(() => aosPerOmrade(filtered), [filtered]);
   const aou = useMemo(() => aouPerOmrade(filtered), [filtered]);
+  // Slutlig AOU – Godkänd (Ja/Nej) per hållbarhetsområde
+  const aouGodkand = useMemo(() => aou.map((r) => ({
+    id: r.id,
+    name: r.name,
+    ja: r.godkanda,
+    nej: r.bedomda - r.godkanda,
+  })), [aou]);
   const fordelning = useMemo(() => fordelningAntalOmraden(filtered), [filtered]);
   // Områdesstaplar uppdelade efter AOS-bedömning: 1–3 respektive 0 (Nej)
   const omradenBedomning = useMemo(() => aos.map((r) => ({
@@ -217,6 +224,20 @@ export default function DiagramPage() {
                 {(['b1', 'b2', 'b3'] as const).map((k) => (
                   <Bar key={k} dataKey={k} stackId="aou" fill={AOU_FARG[k.replace('b', '')]} maxBarSize={20} />
                 ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
+
+          <ChartCard title="Slutlig AOU – Godkänd, per hållbarhetsområde" subtitle="Handläggarens slutliga bedömning (Ja/Nej)">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart layout="vertical" data={aouGodkand} margin={{ left: 4, right: 50, top: 0, bottom: 0 }}>
+                <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
+                <YAxis type="category" dataKey="name" width={200} tick={{ fontSize: 10 }} tickLine={false} axisLine={false} interval={0} />
+                <Tooltip contentStyle={TOOLTIP_STYLE}
+                  formatter={(v, n) => [`${formatNumber(Number(v))} st`, n === 'ja' ? 'Godkänd – Ja' : 'Godkänd – Nej']} />
+                <Legend formatter={(v) => (v === 'ja' ? 'Godkänd – Ja' : 'Godkänd – Nej')} wrapperStyle={{ fontSize: 10 }} />
+                <Bar dataKey="ja" stackId="aoug" fill="#00A896" maxBarSize={20} />
+                <Bar dataKey="nej" stackId="aoug" fill="#D64550" radius={[0, 3, 3, 0]} maxBarSize={20} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
