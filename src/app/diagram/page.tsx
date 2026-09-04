@@ -33,6 +33,14 @@ export default function DiagramPage() {
   const aos = useMemo(() => aosPerOmrade(filtered), [filtered]);
   const aou = useMemo(() => aouPerOmrade(filtered), [filtered]);
   const fordelning = useMemo(() => fordelningAntalOmraden(filtered), [filtered]);
+  // Områdesstaplar uppdelade efter AOS-bedömning: 1–3 respektive 0 (Nej)
+  const omradenBedomning = useMemo(() => aos.map((r) => ({
+    id: r.id,
+    name: r.name,
+    bedomd123: r.n1 + r.n2 + r.n3,
+    bedomd0: r.n0,
+    total: r.total,
+  })), [aos]);
   const aosTotal = useMemo(
     () => aosFordelning(filtered).map((d) => ({ name: AOS_SKALA[d.niva], value: d.antal, niva: d.niva })).filter((d) => d.value > 0),
     [filtered],
@@ -79,14 +87,18 @@ export default function DiagramPage() {
             title="Antal ärenden per hållbarhetsområde"
             subtitle={`Obs! Staplarna överlappar: ett ärende som valt flera hållbarhetsområden räknas i varje stapel. Staplarna summerar till ${formatNumber(omraden.reduce((s, d) => s + d.antal, 0))} områdesval — urvalet innehåller ${formatNumber(filtered.length)} ärenden.`}
           >
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart layout="vertical" data={omraden} margin={{ left: 4, right: 50, top: 0, bottom: 0 }}>
+            <ResponsiveContainer width="100%" height={290}>
+              <BarChart layout="vertical" data={omradenBedomning} margin={{ left: 4, right: 50, top: 0, bottom: 0 }}>
                 <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
                 <YAxis type="category" dataKey="name" width={220} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} interval={0} />
-                <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => [`${formatNumber(Number(v))} st`, 'Ärenden']} />
-                <Bar dataKey="antal" radius={[0, 3, 3, 0]} maxBarSize={22}>
-                  {omraden.map((d) => <Cell key={d.id} fill={OMRADE_FARG[d.id]} />)}
-                  <LabelList dataKey="antal" position="right" style={LABEL_STYLE} formatter={(v: React.ReactNode) => formatNumber(Number(v))} />
+                <Tooltip contentStyle={TOOLTIP_STYLE}
+                  formatter={(v, n) => [`${formatNumber(Number(v))} st`, n === 'bedomd123' ? 'AOS-bedömning 1–3' : 'AOS-bedömning 0 – Nej']} />
+                <Legend formatter={(v) => (v === 'bedomd123' ? 'AOS-bedömning 1–3 (Hänsyn/Positiv/Transformativt)' : 'AOS-bedömning 0 – Nej')} wrapperStyle={{ fontSize: 11 }} />
+                <Bar dataKey="bedomd123" stackId="omr" maxBarSize={22}>
+                  {omradenBedomning.map((d) => <Cell key={d.id} fill={OMRADE_FARG[d.id]} />)}
+                </Bar>
+                <Bar dataKey="bedomd0" stackId="omr" fill="#C9C4D4" radius={[0, 3, 3, 0]} maxBarSize={22}>
+                  <LabelList dataKey="total" position="right" style={LABEL_STYLE} formatter={(v: React.ReactNode) => formatNumber(Number(v))} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
