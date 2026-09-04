@@ -20,7 +20,8 @@ export function formatKrFull(n: number): string {
 }
 
 export function formatPct(n: number): string {
-  return `${n.toLocaleString('sv-SE', { maximumFractionDigits: 1 })} %`;
+  // Två värdesiffror och hårt mellanslag så att värdet inte radbryts i tabellceller
+  return `${n.toLocaleString('sv-SE', { maximumSignificantDigits: 2 })} %`;
 }
 
 // ─── KPI-beräkningar ────────────────────────────────────────────────────────
