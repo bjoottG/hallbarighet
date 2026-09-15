@@ -11,7 +11,7 @@ import {
   kpiBeviljat, kpiAntalOmradesval,
   kpiSnittOmraden, kpiAndelAosPositiv, kpiAouBidragitAndel,
   perOmrade, perDelomrade, aosPerOmrade, aouPerOmrade, aosFordelning,
-  fordelningAntalOmraden,
+  fordelningAntalOmraden, toppOmradenPerBransch,
   formatNumber, formatKr, formatPct,
 } from '@/lib/dataUtils';
 import {
@@ -40,6 +40,7 @@ export default function DiagramPage() {
     nej: r.bedomda - r.godkanda,
   })), [aou]);
   const fordelning = useMemo(() => fordelningAntalOmraden(filtered), [filtered]);
+  const toppBransch = useMemo(() => toppOmradenPerBransch(filtered), [filtered]);
   // Områdesstaplar uppdelade efter AOS-bedömning: 1–3 respektive 0 (Nej)
   const omradenBedomning = useMemo(() => aos.map((r) => ({
     id: r.id,
@@ -144,6 +145,27 @@ export default function DiagramPage() {
               <Bar dataKey="antal" fill={DIAGRAM_COLORS[0]} radius={[3, 3, 0, 0]} maxBarSize={40}>
                 <LabelList dataKey="antal" position="top" style={LABEL_STYLE} formatter={(v: React.ReactNode) => formatNumber(Number(v))} />
               </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartCard>
+
+        {/* Rad 1c: Topp 3 hållbarhetsområden per bransch */}
+        <ChartCard
+          title="De tre vanligaste hållbarhetsområdena fördelat på bransch, antal ärenden"
+          subtitle="De tre hållbarhetsområden som valts oftast i urvalet, fördelade på bransch. Ett ärende räknas i varje valt område."
+        >
+          <ResponsiveContainer width="100%" height={Math.max(toppBransch.data.length * 64 + 60, 200)}>
+            <BarChart layout="vertical" data={toppBransch.data} margin={{ left: 4, right: 50, top: 0, bottom: 0 }}>
+              <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
+              <YAxis type="category" dataKey="bransch" width={220} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} interval={0} />
+              <Tooltip contentStyle={TOOLTIP_STYLE}
+                formatter={(v, n) => [`${formatNumber(Number(v))} st`, toppBransch.topp.find((t) => t.id === n)?.namn ?? String(n)]} />
+              <Legend formatter={(v) => toppBransch.topp.find((t) => t.id === v)?.namn ?? String(v)} wrapperStyle={{ fontSize: 11 }} />
+              {toppBransch.topp.map((t) => (
+                <Bar key={t.id} dataKey={t.id} fill={OMRADE_FARG[t.id]} radius={[0, 3, 3, 0]} maxBarSize={14}>
+                  <LabelList dataKey={t.id} position="right" style={LABEL_STYLE} formatter={(v: React.ReactNode) => formatNumber(Number(v))} />
+                </Bar>
+              ))}
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>

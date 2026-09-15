@@ -123,6 +123,37 @@ export function perFalt(rows: Arende[], key: 'utlysning' | 'bransch' | 'stodtyp'
   return [...map.values()].sort((a, b) => b.antal - a.antal);
 }
 
+export interface ToppOmradenPerBransch {
+  topp: { id: string; namn: string }[];
+  data: ({ bransch: string } & Record<string, string | number>)[];
+}
+
+/** De N vanligaste hållbarhetsområdena i urvalet, antal ärenden per bransch.
+ *  Motsvarar Bild 3 i rapporten Samverkan för hållbar utveckling, men med
+ *  hållbarhetsområden i stället för globala mål. */
+export function toppOmradenPerBransch(rows: Arende[], antal = 3): ToppOmradenPerBransch {
+  const totalt = OMRADEN.map((o) => ({
+    id: o.id,
+    namn: o.namn,
+    antal: rows.reduce((s, r) => s + (r.omraden[o.id]?.valt ? 1 : 0), 0),
+  }));
+  const topp = [...totalt].sort((a, b) => b.antal - a.antal).slice(0, antal);
+
+  const map = new Map<string, Record<string, number>>();
+  for (const r of rows) {
+    const b = r.bransch || 'Okänd';
+    if (!map.has(b)) map.set(b, Object.fromEntries(topp.map((t) => [t.id, 0])));
+    const e = map.get(b)!;
+    for (const t of topp) if (r.omraden[t.id]?.valt) e[t.id] += 1;
+  }
+  const data = [...map.entries()]
+    .sort((a, b) =>
+      topp.reduce((s, t) => s + b[1][t.id], 0) - topp.reduce((s, t) => s + a[1][t.id], 0))
+    .map(([bransch, counts]) => ({ bransch, ...counts }));
+
+  return { topp: topp.map(({ id, namn }) => ({ id, namn })), data };
+}
+
 export interface OmradeRad extends GruppRad {
   id: string;
   andel: number; // 0–100 av ärenden i urvalet
