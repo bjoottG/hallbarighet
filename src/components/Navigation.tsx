@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const tabs = [
-  { label: 'Diagram', href: '/diagram' },
+  { label: 'Ansökningar', href: '/ansokningar' },
+  { label: 'Bedömning', href: '/bedomning' },
+  { label: 'Utfall', href: '/utfall' },
   { label: 'Tabeller', href: '/tabeller' },
   { label: 'Agenda 2030', href: '/agenda2030' },
   { label: 'Ordlista', href: '/ordlista' },
