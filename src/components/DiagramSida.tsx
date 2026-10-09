@@ -23,6 +23,9 @@ import {
 } from 'recharts';
 
 const TOOLTIP_STYLE = { fontSize: 11, borderRadius: 8 };
+
+// Diagrammet "Beviljat belopp per hållbarhetsområde" är dolt tills vidare
+const VISA_BEVILJAT_PER_OMRADE = false;
 const LABEL_STYLE = { fontSize: 10, fill: 'var(--color-text-muted)' };
 
 // Axelrubrik för antalsaxeln (x) i liggande diagram
@@ -100,7 +103,7 @@ export default function DiagramSida({ flik }: { flik: Flik }) {
         {flik === 'ansokningar' && (
           <>
             {/* Rad 1: Ärenden + beviljat per hållbarhetsområde */}
-            <div className="grid grid-cols-2 gap-5">
+            <div className={`grid gap-5 ${VISA_BEVILJAT_PER_OMRADE ? 'grid-cols-2' : 'grid-cols-1'}`}>
               <ChartCard
                 title="Antal ärenden per hållbarhetsområde"
                 subtitle={`Obs! Staplarna överlappar: ett ärende som valt flera hållbarhetsområden räknas i varje stapel. Staplarna summerar till ${formatNumber(omraden.reduce((s, d) => s + d.antal, 0))} områdesval — urvalet innehåller ${formatNumber(filtered.length)} ärenden.`}
@@ -120,23 +123,25 @@ export default function DiagramSida({ flik }: { flik: Flik }) {
                 </ResponsiveContainer>
               </ChartCard>
 
-              <ChartCard
-                title="Beviljat belopp per hållbarhetsområde"
-                subtitle={`Obs! Staplarna överlappar: hela ärendets beviljade belopp räknas i varje valt hållbarhetsområde. Staplarna summerar till ${formatKr(omraden.reduce((s, d) => s + d.beviljat, 0))} — urvalets beviljade belopp är ${formatKr(kpiBeviljat(filtered))}.`}
-              >
-                <ResponsiveContainer width="100%" height={260}>
-                  <BarChart layout="vertical" data={omraden} margin={{ left: 4, right: 70, top: 0, bottom: 0 }}>
-                    <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false}
-                      tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)} mnkr`} />
-                    <YAxis type="category" dataKey="name" width={220} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} interval={0} />
-                    <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => [formatKr(Number(v)), 'Beviljat']} />
-                    <Bar dataKey="beviljat" radius={[0, 3, 3, 0]} maxBarSize={22}>
-                      {omraden.map((d) => <Cell key={d.id} fill={OMRADE_FARG[d.id]} />)}
-                      <LabelList dataKey="beviljat" position="right" style={LABEL_STYLE} formatter={(v: React.ReactNode) => formatKr(Number(v))} />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartCard>
+              {VISA_BEVILJAT_PER_OMRADE && (
+                <ChartCard
+                  title="Beviljat belopp per hållbarhetsområde"
+                  subtitle={`Obs! Staplarna överlappar: hela ärendets beviljade belopp räknas i varje valt hållbarhetsområde. Staplarna summerar till ${formatKr(omraden.reduce((s, d) => s + d.beviljat, 0))} — urvalets beviljade belopp är ${formatKr(kpiBeviljat(filtered))}.`}
+                >
+                  <ResponsiveContainer width="100%" height={260}>
+                    <BarChart layout="vertical" data={omraden} margin={{ left: 4, right: 70, top: 0, bottom: 0 }}>
+                      <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false}
+                        tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)} mnkr`} />
+                      <YAxis type="category" dataKey="name" width={220} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} interval={0} />
+                      <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => [formatKr(Number(v)), 'Beviljat']} />
+                      <Bar dataKey="beviljat" radius={[0, 3, 3, 0]} maxBarSize={22}>
+                        {omraden.map((d) => <Cell key={d.id} fill={OMRADE_FARG[d.id]} />)}
+                        <LabelList dataKey="beviljat" position="right" style={LABEL_STYLE} formatter={(v: React.ReactNode) => formatKr(Number(v))} />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+              )}
             </div>
 
             {/* Antal hållbarhetsområden per ärende */}
