@@ -1,10 +1,11 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Header from '@/components/Header';
 import Navigation from '@/components/Navigation';
 import FilterBar from '@/components/FilterBar';
 import KPICard from '@/components/KPICard';
+import Modal from '@/components/Modal';
 import { ChartCard, TableCard, TH, TD } from '@/components/Cards';
 import { useFilters } from '@/context/FilterContext';
 import {
@@ -32,8 +33,35 @@ function MalBadge({ mal }: { mal: number }) {
   );
 }
 
+function InfoRuta({ titel, text, onClick }: { titel: string; text: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-haspopup="dialog"
+      className="group flex items-start gap-3 text-left bg-white rounded-xl shadow-sm border p-4 cursor-pointer transition hover:shadow-md hover:border-[var(--color-primary-light)] focus-visible:outline-2 focus-visible:outline-[var(--color-primary)]"
+      style={{ borderColor: 'var(--color-border)', borderLeft: '4px solid var(--color-primary)' }}
+    >
+      <span
+        className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-full text-sm font-bold text-white"
+        style={{ background: 'var(--color-primary)' }}
+        aria-hidden
+      >
+        i
+      </span>
+      <span className="flex flex-col gap-0.5">
+        <span className="font-bold text-sm group-hover:underline" style={{ color: 'var(--color-primary)' }}>
+          {titel} →
+        </span>
+        <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{text}</span>
+      </span>
+    </button>
+  );
+}
+
 export default function Agenda2030Page() {
   const { filtered, isLoading } = useFilters();
+  const [oppenModal, setOppenModal] = useState<'omraden' | 'mal' | null>(null);
 
   const malRader = useMemo(() => perAgendaMal(filtered), [filtered]);
 
@@ -75,11 +103,26 @@ export default function Agenda2030Page() {
 
       <main className="max-w-[1200px] mx-auto px-6 py-5 flex flex-col gap-5">
 
+        {/* Inforutor som öppnar relationsmodalerna */}
+        <div className="grid grid-cols-2 gap-4">
+          <InfoRuta
+            titel="Hållbarhetsområden och Agenda 2030"
+            text="Se hur hållbarhetsområden och delområden kopplas till de globala målen."
+            onClick={() => setOppenModal('omraden')}
+          />
+          <InfoRuta
+            titel="Från Agenda 2030-mål till hållbarhetsområden"
+            text="Se samma koppling från målens håll: vilka områden och delområden hör till varje mål."
+            onClick={() => setOppenModal('mal')}
+          />
+        </div>
+
         {/* Relationer: hållbarhetsområden → delområden → Agenda 2030-mål */}
-        <section>
-          <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--color-text)' }}>
-            Hållbarhetsområden och Agenda 2030
-          </h2>
+        <Modal
+          open={oppenModal === 'omraden'}
+          onClose={() => setOppenModal(null)}
+          title="Hållbarhetsområden och Agenda 2030"
+        >
           <p className="text-sm mb-4 max-w-[820px]" style={{ color: 'var(--color-text-muted)' }}>
             Varje ärende kan bidra till ett eller flera hållbarhetsområden (Nivå 1), som i sin tur består av
             delområden (Nivå 2). Varje delområde är kopplat till ett eller flera av de 17 globala målen i
@@ -113,13 +156,14 @@ export default function Agenda2030Page() {
               </div>
             ))}
           </div>
-        </section>
+        </Modal>
 
         {/* Omvända relationer: Agenda 2030-mål → hållbarhetsområden → delområden */}
-        <section>
-          <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--color-text)' }}>
-            Från Agenda 2030-mål till hållbarhetsområden
-          </h2>
+        <Modal
+          open={oppenModal === 'mal'}
+          onClose={() => setOppenModal(null)}
+          title="Från Agenda 2030-mål till hållbarhetsområden"
+        >
           <p className="text-sm mb-4 max-w-[820px]" style={{ color: 'var(--color-text-muted)' }}>
             Samma koppling sedd från målens håll: för varje globalt mål visas vilka hållbarhetsområden
             och delområden som hör till målet.
@@ -171,7 +215,7 @@ export default function Agenda2030Page() {
               );
             })}
           </div>
-        </section>
+        </Modal>
 
         {/* KPI-rad */}
         <div className="grid grid-cols-4 gap-4">
