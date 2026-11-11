@@ -9,7 +9,7 @@ import Modal from '@/components/Modal';
 import { ChartCard, TableCard, TH, TD } from '@/components/Cards';
 import { useFilters } from '@/context/FilterContext';
 import {
-  perAgendaMal, arendeAgendaMal, formatNumber, formatKr, formatPct,
+  perAgendaMal, arendeAgendaMal, formatNumber, formatPct,
 } from '@/lib/dataUtils';
 import {
   OMRADEN, OMRADE_FARG, AGENDA_MAL_NAMN, AGENDA_MAL_FARG, DELOMRADE_NAMN,
@@ -67,13 +67,11 @@ export default function Agenda2030Page() {
 
   const kpis = useMemo(() => {
     const medMal = filtered.filter((r) => arendeAgendaMal(r).length > 0);
-    const beviljatMedMal = medMal.reduce((s, r) => s + (r.beviljat || 0), 0);
     const vanligaste = [...malRader].sort((a, b) => b.antal - a.antal)[0];
     return {
       antalMal: malRader.filter((m) => m.antal > 0).length,
       medMal: medMal.length,
       andelMedMal: filtered.length === 0 ? 0 : (medMal.length / filtered.length) * 100,
-      beviljatMedMal,
       vanligaste,
     };
   }, [filtered, malRader]);
@@ -218,7 +216,7 @@ export default function Agenda2030Page() {
         </Modal>
 
         {/* KPI-rad */}
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <KPICard
             title="Globala mål som berörs"
             value={`${formatNumber(kpis.antalMal)} av 17`}
@@ -230,11 +228,6 @@ export default function Agenda2030Page() {
             subtitle={`${formatPct(kpis.andelMedMal)} av ärendena i urvalet`}
           />
           <KPICard
-            title="Beviljat med målkoppling"
-            value={formatKr(kpis.beviljatMedMal)}
-            subtitle="Beviljat belopp för ärenden kopplade till minst ett mål"
-          />
-          <KPICard
             title="Vanligaste målet"
             value={kpis.vanligaste && kpis.vanligaste.antal > 0 ? `Mål ${kpis.vanligaste.mal}` : '–'}
             subtitle={kpis.vanligaste && kpis.vanligaste.antal > 0
@@ -243,8 +236,8 @@ export default function Agenda2030Page() {
           />
         </div>
 
-        {/* Diagram: ärenden + beviljat per mål */}
-        <div className="grid grid-cols-2 gap-5">
+        {/* Diagram: ärenden per mål */}
+        <div className="grid grid-cols-1 gap-5">
           <ChartCard title="Antal ärenden per Agenda 2030-mål" subtitle="Ett ärende kan bidra till flera mål">
             <ResponsiveContainer width="100%" height={380}>
               <BarChart layout="vertical" data={chartData} margin={{ left: 4, right: 50, top: 0, bottom: 0 }}>
@@ -263,24 +256,6 @@ export default function Agenda2030Page() {
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="Beviljat belopp per Agenda 2030-mål" subtitle="Summa beviljat för ärenden kopplade till målet">
-            <ResponsiveContainer width="100%" height={380}>
-              <BarChart layout="vertical" data={chartData} margin={{ left: 4, right: 70, top: 0, bottom: 0 }}>
-                <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false}
-                  tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)} mnkr`} />
-                <YAxis type="category" dataKey="name" width={60} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} interval={0} />
-                <Tooltip contentStyle={TOOLTIP_STYLE}
-                  formatter={(v) => [formatKr(Number(v)), 'Beviljat']}
-                  labelFormatter={(l) => {
-                    const m = Number(String(l).replace('Mål ', ''));
-                    return `Mål ${m} – ${AGENDA_MAL_NAMN[m]}`;
-                  }} />
-                <Bar dataKey="beviljat" radius={[0, 3, 3, 0]} maxBarSize={16}>
-                  {chartData.map((d) => <Cell key={d.mal} fill={AGENDA_MAL_FARG[d.mal]} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartCard>
         </div>
 
         {/* Tabell: per mål */}
@@ -297,7 +272,6 @@ export default function Agenda2030Page() {
                 <TH>Kopplade delområden</TH>
                 <TH right>Ärenden</TH>
                 <TH right>Andel</TH>
-                <TH right>Beviljat</TH>
               </tr>
             </thead>
             <tbody>
@@ -312,7 +286,6 @@ export default function Agenda2030Page() {
                   </TD>
                   <TD right mono>{formatNumber(r.antal)}</TD>
                   <TD right mono>{formatPct(r.andel)}</TD>
-                  <TD right mono>{formatKr(r.beviljat)}</TD>
                 </tr>
               ))}
             </tbody>

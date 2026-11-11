@@ -84,7 +84,6 @@ export default function OversiktPage() {
                   <TH>Hållbarhetsområde</TH>
                   <TH right>Ärenden</TH>
                   <TH right>Andel</TH>
-                  <TH right>Beviljat</TH>
                   <TH right>Utbetalt</TH>
                 </tr>
               </thead>
@@ -94,7 +93,6 @@ export default function OversiktPage() {
                     <TD>{r.name}</TD>
                     <TD right mono>{formatNumber(r.antal)}</TD>
                     <TD right mono>{formatPct(r.andel)}</TD>
-                    <TD right mono>{formatKr(r.beviljat)}</TD>
                     <TD right mono>{formatKr(r.utbetalt)}</TD>
                   </tr>
                 ))}
@@ -236,7 +234,6 @@ export default function OversiktPage() {
                 <TH>Beslutande organisation</TH>
                 <TH>Utlysning</TH>
                 <TH>Bransch</TH>
-                <TH right>Beviljat</TH>
                 <TH right>Utbetalt</TH>
                 <TH right>Hållbarhetsområden</TH>
               </tr>
@@ -249,7 +246,6 @@ export default function OversiktPage() {
                   <TD>{r.beslutandeOrg}</TD>
                   <TD title={r.utlysning}><span className="block max-w-[240px] truncate">{r.utlysning}</span></TD>
                   <TD>{r.bransch}</TD>
-                  <TD right mono>{formatKrFull(r.beviljat)}</TD>
                   <TD right mono>{formatKrFull(r.utbetalt)}</TD>
                   <TD right mono>{antalOmraden(r)}</TD>
                 </tr>
