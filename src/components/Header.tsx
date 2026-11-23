@@ -23,6 +23,16 @@ export default function Header() {
           Hållbarhet
         </h1>
 
+        {/* Utloggning */}
+        <form method="post" action="/api/logout" className="ml-auto">
+          <button
+            type="submit"
+            className="text-xs px-2.5 py-1 rounded border hover:bg-gray-50"
+            style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
+          >
+            Logga ut
+          </button>
+        </form>
       </div>
     </header>
   );
